@@ -288,7 +288,7 @@ def main():
         st.write("")
 
         st.markdown(
-            "<h3 style='text-align:left; color:#00426a; font-size:2.2rem;'>Ask anything about CSPC 2023 panels</h2>",
+            "<h3 style='text-align:left; color:#00426a; font-size:1.8rem;'>Ask anything about CSPC 2023 panels</h3>",
             unsafe_allow_html=True)
         question = st.text_input("", placeholder="e.g. What was said about AI and scientific discovery?",
                                  label_visibility="collapsed")
