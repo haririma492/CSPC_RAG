@@ -286,10 +286,13 @@ def main():
     _, col, _ = st.columns([0.1, 2.2, 0.1])
     with col:
         st.write("")
-
         st.markdown(
-            "<h3 style='text-align:left; color:#00426a; font-size:1.8rem;'>Ask anything about CSPC 2023 panels</h3>",
-            unsafe_allow_html=True)
+            "<h3 style='text-align:left; color:#00426a; font-size:1.8rem !important;'>"
+            "Ask anything about CSPC 2023 panels"
+            "</h3>",
+            unsafe_allow_html=True
+        )
+
         question = st.text_input("", placeholder="e.g. What was said about AI and scientific discovery?",
                                  label_visibility="collapsed")
 
