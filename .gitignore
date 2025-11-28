@@ -1,0 +1,32 @@
+# Virtual environments
+.venv/
+venv/
+
+# Python cache / compiled files
+__pycache__/
+*.py[cod]
+*.pyo
+*.pyd
+
+# IDE / editor settings
+.idea/
+.vscode/
+
+# FFmpeg binaries (too large for GitHub)
+ffmpeg/
+
+# Large archives / temporary data
+*.zip
+*.tar
+*.tar.gz
+*.7z
+
+# Logs and temp files
+*.log
+*.tmp
+*.temp
+
+# OS-specific junk
+.DS_Store
+Thumbs.db
+desktop.ini
