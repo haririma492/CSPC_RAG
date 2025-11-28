@@ -287,7 +287,7 @@ def main():
     with col:
         st.write("")
         st.markdown(
-            "<h3 style='text-align:left; color:#00426a; font-size:1.8rem !important;'>"
+            "<h3 style='text-align:left; color:#00426a; font-size:1.6rem !important;'>"
             "Ask anything about CSPC 2023 panels"
             "</h3>",
             unsafe_allow_html=True
