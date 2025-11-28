@@ -288,20 +288,7 @@ def main():
         st.markdown(
             "<h2 style='text-align:left; color:#00426a; font-size:3rem;'></h2>",
             unsafe_allow_html=True)
-        st.markdown("""
-        <style>
-        /* Make typed text bigger inside any text_input */
-        input[type="text"] {
-            font-size: 1.8rem !important;     /* Bigger typing text */
-            padding: 0.8rem 1rem !important;  /* Optional: bigger box */
-        }
 
-        /* Make placeholder text bigger also */
-        input::placeholder {
-            font-size: 1.4rem !important;
-        }
-        </style>
-        """, unsafe_allow_html=True)
         st.markdown(
             "<h2 style='text-align:left; color:#00426a; font-size:2.2rem;'>Ask anything about CSPC 2023 panels</h2>",
             unsafe_allow_html=True)
