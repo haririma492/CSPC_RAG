@@ -234,7 +234,7 @@ def main():
                     CSPC AI Platform
                 </div>
                 <div style="font-size:2rem; font-style:italic; color:#00426a;">
-                    (Making every moment searchable)
+                    (Every moment could be actionable)
                 </div>
             </div>
             """,
