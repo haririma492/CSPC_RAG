@@ -233,7 +233,7 @@ def main():
                 <div style="font-size:3rem; font-weight:bold; color:#00426a;">
                     CSPC AI Platform
                 </div>
-                <div style="font-size:2rem; font-style:italic; color:#00426a;">
+                <div style="font-size:1.5rem; font-style:italic; color:#00426a;">
                     (Every moment could be actionable)
                 </div>
             </div>
