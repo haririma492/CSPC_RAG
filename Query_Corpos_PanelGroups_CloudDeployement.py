@@ -219,7 +219,27 @@ def main():
         button {font-size: 1.3rem !important;}
         audio {width: 100%;}
 
-        ...
+        /* Thin border around each chunk */
+        .chunk-root {
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            padding: 0.75rem 0.9rem;
+            margin-bottom: 1.1rem;
+            background-color: #fdfdfd;
+        }
+
+        .results-header {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 1.5rem 0 1rem 0;
+            color: #00426a;
+        }
+
+        .panel-separator {
+            border: none;
+            border-top: 2px solid #ccc;
+            margin: 2rem 0;
+        }
     </style>
     """, unsafe_allow_html=True)
 
@@ -299,8 +319,11 @@ def main():
             unsafe_allow_html=True
         )
 
-        question = st.text_input("", placeholder="e.g. What was said about AI and scientific discovery?",
-                                 label_visibility="collapsed")
+        question = st.text_input(
+            "",
+            placeholder="e.g. What was said about AI and scientific discovery?",
+            label_visibility="collapsed"
+        )
 
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
@@ -324,20 +347,23 @@ def main():
 
         c1, c2 = st.columns([1, 2])
         with c1:
-            st.markdown('<p style="font-size:1.3rem;font-weight:bold;margin-bottom:0.5rem;">Theme</p>',
-                        unsafe_allow_html=True)
+            st.markdown(
+                '<p style="font-size:1.3rem;font-weight:bold;margin-bottom:0.5rem;">Theme</p>',
+                unsafe_allow_html=True
+            )
             theme_options = ["All"] + available_themes
             selected_theme = st.selectbox("Theme", theme_options, key="theme", label_visibility="collapsed")
 
         with c2:
-            st.markdown('<p style="font-size:1.3rem;font-weight:bold;margin-bottom:0.5rem;">Panel</p>',
-                        unsafe_allow_html=True)
+            st.markdown(
+                '<p style="font-size:1.3rem;font-weight:bold;margin-bottom:0.5rem;">Panel</p>',
+                unsafe_allow_html=True
+            )
 
             # Filter panels based on selected theme
             if selected_theme == "All":
                 filtered_panels = all_panels
             else:
-                # Fetch panels that match the selected theme
                 try:
                     panels_coll = client.collections.get("CSPC_Panels")
                     response = panels_coll.query.fetch_objects(
@@ -351,8 +377,10 @@ def main():
                         if panel_code:
                             filtered_panel_codes.add(str(panel_code))
 
-                    # Filter the all_panels list to only include matching panels
-                    filtered_panels = [(code, display) for code, display in all_panels if code in filtered_panel_codes]
+                    filtered_panels = [
+                        (code, display) for code, display in all_panels
+                        if code in filtered_panel_codes
+                    ]
                 except Exception as e:
                     st.sidebar.warning(f"Could not filter panels by theme: {e}")
                     filtered_panels = all_panels
@@ -360,21 +388,19 @@ def main():
             panel_options = ["All"] + [display for _, display in filtered_panels]
             selected_panel = st.selectbox("Panel", panel_options, key="panel", label_visibility="collapsed")
 
+    # Search button
     _, btn_col, _ = st.columns([1.5, 1, 1.5])
     with btn_col:
         st.markdown("""
         <style>
-        /* Style all primary buttons (like your Search button) */
         button[kind="primary"] {
-            background-color: #00426a !important;  /* button background */
-            color: white !important;               /* text color */
-            font-size: 1.5rem !important;          /* bigger text */
-            padding: 0.8rem 2.2rem !important;     /* bigger button */
-            border-radius: 0.6rem !important;      /* rounded corners */
+            background-color: #00426a !important;
+            color: white !important;
+            font-size: 1.5rem !important;
+            padding: 0.8rem 2.2rem !important;
+            border-radius: 0.6rem !important;
             border: 2px solid #003356 !important;
         }
-
-        /* Optional: nicer hover effect */
         button[kind="primary"]:hover {
             background-color: #005a92 !important;
             border-color: #003356 !important;
@@ -382,6 +408,7 @@ def main():
         </style>
         """, unsafe_allow_html=True)
         search_clicked = st.button("Search", type="primary", use_container_width=True)
+
     if search_clicked:
         if not question.strip():
             st.warning("Please enter a question.")
@@ -398,7 +425,6 @@ def main():
                     filters.append(Filter.by_property("panel_theme").contains_any([selected_theme]))
 
                 if selected_panel != "All":
-                    # Extract panel code from "Panel 333 - Title" format
                     panel_code = selected_panel.split(" - ")[0].replace("Panel ", "").strip()
                     filters.append(Filter.by_property("panel_code").equal(panel_code))
 
@@ -409,17 +435,28 @@ def main():
                     where = filters[0] & filters[1]
 
                 oai = OpenAI(api_key=openai_key)
-                qvec = oai.embeddings.create(model="text-embedding-3-small", input=question).data[0].embedding
+                qvec = oai.embeddings.create(
+                    model="text-embedding-3-small",
+                    input=question
+                ).data[0].embedding
+
                 limit = 50 if use_reranker else top_k
 
                 res = docchunk_coll.query.hybrid(
-                    query=question, vector=qvec, alpha=alpha, limit=limit, filters=where,
+                    query=question,
+                    vector=qvec,
+                    alpha=alpha,
+                    limit=limit,
+                    filters=where,
                     return_metadata=MetadataQuery(score=True),
-                    return_properties=["text", "file_name", "chunk_start_time", "chunk_id", "chunk_speakers",
-                                       "panel_theme", "panel_code", "doc_id"]
+                    return_properties=[
+                        "text", "file_name", "chunk_start_time", "chunk_id",
+                        "chunk_speakers", "panel_theme", "panel_code", "doc_id"
+                    ]
                 )
                 objects = list(res.objects)
 
+                # Rerank
                 if use_reranker and objects:
                     with st.spinner("Reranking..."):
                         reranker = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2")
@@ -434,17 +471,33 @@ def main():
                 # AI Answer
                 if use_llm and objects:
                     with st.spinner("Generating AI answer..."):
-                        context = "\n\n".join([
-                                                  f"[{i}] Panel {o.properties.get('panel_code', '?')} | {o.properties.get('chunk_start_time', '')}\n{o.properties.get('text', '')}"
-                                                  for i, o in enumerate(objects[:8], 1)])
-                        resp = oai.chat.completions.create(model="gpt-4o-mini", messages=[
-                            {"role": "system",
-                             "content": "Answer using only the provided context from CSPC 2023 conference panels."},
-                            {"role": "user", "content": f"Question: {question}\n\nContext:\n{context}\n\nAnswer:"}
-                        ], temperature=0.2)
+                        context = "\n\n".join(
+                            [
+                                f"[{i}] Panel {o.properties.get('panel_code', '?')} | "
+                                f"{o.properties.get('chunk_start_time', '')}\n"
+                                f"{o.properties.get('text', '')}"
+                                for i, o in enumerate(objects[:8], 1)
+                            ]
+                        )
+                        resp = oai.chat.completions.create(
+                            model="gpt-4o-mini",
+                            messages=[
+                                {
+                                    "role": "system",
+                                    "content": "Answer using only the provided context from CSPC 2023 conference panels.",
+                                },
+                                {
+                                    "role": "user",
+                                    "content": f"Question: {question}\n\nContext:\n{context}\n\nAnswer:",
+                                },
+                            ],
+                            temperature=0.2,
+                        )
                         answer = resp.choices[0].message.content
-                        st.markdown('<h2 style="font-size:2.8rem; color:#00426a; margin-bottom:1rem;">AI Answer</h2>',
-                                    unsafe_allow_html=True)
+                        st.markdown(
+                            '<h2 style="font-size:2.8rem; color:#00426a; margin-bottom:1rem;">AI Answer</h2>',
+                            unsafe_allow_html=True
+                        )
                         st.markdown(answer)
                         st.markdown("---")
 
@@ -462,8 +515,10 @@ def main():
                         panels_dict[str(panel_code)].append(item)
 
                     st.markdown(
-                        f'<div class="results-header">Top {len(objects)} Results from {len(panels_dict)} Different Panels</div>',
-                        unsafe_allow_html=True)
+                        f'<div class="results-header">Top {len(objects)} Results from '
+                        f'{len(panels_dict)} Different Panels</div>',
+                        unsafe_allow_html=True
+                    )
 
                     panel_order = []
                     for panel_code, items in panels_dict.items():
@@ -475,16 +530,21 @@ def main():
                         if idx_panel > 0:
                             st.markdown('<hr class="panel-separator">', unsafe_allow_html=True)
 
-                        first_chunk = items[0]["obj"].properties
+                        first_chunk = items[0].get("obj").properties
                         panel_metadata = get_panel_metadata_from_cspc_panels(client, panel_code)
 
                         # Panel header with photo
                         title_col, photo_col = st.columns([1, 1])
                         with title_col:
-                            st.markdown(f'<div class="panel-number">Panel {panel_code}</div>', unsafe_allow_html=True)
+                            st.markdown(
+                                f'<div class="panel-number">Panel {panel_code}</div>',
+                                unsafe_allow_html=True
+                            )
                             if panel_metadata.get("title"):
-                                st.markdown(f'<div class="panel-title">{panel_metadata["title"]}</div>',
-                                            unsafe_allow_html=True)
+                                st.markdown(
+                                    f'<div class="panel-title">{panel_metadata["title"]}</div>',
+                                    unsafe_allow_html=True
+                                )
                             st.markdown('<div class="panel-metadata">', unsafe_allow_html=True)
                             theme = panel_metadata.get("theme") or first_chunk.get("panel_theme", "N/A")
                             st.markdown(f"**Theme:** {theme}")
@@ -493,12 +553,16 @@ def main():
                             if panel_metadata.get("speakers"):
                                 speakers = panel_metadata["speakers"]
                                 st.markdown(
-                                    f"**Speakers:** {', '.join(speakers) if isinstance(speakers, list) else speakers}")
+                                    f"**Speakers:** "
+                                    f"{', '.join(speakers) if isinstance(speakers, list) else speakers}"
+                                )
                             if panel_metadata.get("panel_date"):
                                 st.markdown(f"**Date:** {panel_metadata['panel_date']}")
                             if panel_metadata.get("panel_url"):
                                 st.markdown(
-                                    f"**Panel URL:** [{panel_metadata['panel_url']}]({panel_metadata['panel_url']})")
+                                    f"**Panel URL:** "
+                                    f"[{panel_metadata['panel_url']}]({panel_metadata['panel_url']})"
+                                )
                             st.markdown('</div>', unsafe_allow_html=True)
 
                         with photo_col:
@@ -506,12 +570,12 @@ def main():
                             if photo_url:
                                 try:
                                     st.image(photo_url, use_column_width=True, caption=f"Panel {panel_code}")
-                                except:
+                                except Exception:
                                     st.info("No photo available")
                             else:
                                 st.info("No photo available")
 
-                        # Chunks header with inline underline
+                        # Chunks header
                         st.markdown(f"""
                         <div style="
                             font-size: 1.6rem;
@@ -534,31 +598,51 @@ def main():
                             rank = item["rank"]
                             target_col = chunk_col1 if idx_chunk % 2 == 0 else chunk_col2
 
-                            file_name = chunk_props.get("file_name")  # e.g. "11-13-2023-CSPC-103 - ....mp3"
+                            with target_col:
+                                st.markdown('<div class="chunk-root">', unsafe_allow_html=True)
 
-                            if file_name:
-                                # Replace transcript extension with .mp3
-                                # Example: "....._transcript.txt" -> ".....mp3"
-                                if file_name.lower().endswith("_transcript.txt"):
-                                    base_name = file_name[:-len("_transcript.txt")] + ".mp3"
+                                st.markdown(f"**Rank #{rank}**")
+                                st.write(chunk_props.get("text", ""))
+
+                                # --- Always define time_str here ---
+                                raw_time = chunk_props.get("chunk_start_time")
+                                if not raw_time or raw_time == "—":
+                                    time_str = "00:00:00"
                                 else:
-                                    # Fallback: ensure .mp3 extension
-                                    dot_idx = file_name.rfind(".")
-                                    if dot_idx != -1:
-                                        base_name = file_name[:dot_idx] + ".mp3"
+                                    time_str = raw_time
+
+                                speakers_str = chunk_props.get("chunk_speakers") or "—"
+
+                                if speakers_str != "—":
+                                    st.caption(f"Time: {time_str}")
+                                    st.caption(f"Speakers: {speakers_str}")
+                                else:
+                                    st.caption(f"Time: {time_str}")
+
+                                # --- Build S3 audio URL from file_name in DocChunk ---
+                                file_name = chunk_props.get("file_name")  # transcript file name
+
+                                if file_name:
+                                    # Swap extension to .mp3 (your rule: txt -> mp3)
+                                    base, ext = os.path.splitext(file_name)
+                                    if ext.lower() == ".txt":
+                                        audio_file_name = base + ".mp3"
                                     else:
-                                        base_name = file_name + ".mp3"
+                                        # fallback – still force .mp3 per your rule
+                                        audio_file_name = file_name[:-3] + "mp3" if len(file_name) > 3 else file_name + ".mp3"
 
-                                # URL-encode special chars (spaces, apostrophes, etc.)
-                                safe_file_name = quote(base_name)
+                                    # URL-encode for S3 path
+                                    safe_file_name = quote(audio_file_name)
 
-                                audio_url = f"https://cspc-rag.s3.ca-central-1.amazonaws.com/audio/{safe_file_name}"
+                                    audio_url = (
+                                        f"https://cspc-rag.s3.ca-central-1.amazonaws.com/audio/{safe_file_name}"
+                                    )
 
-                                st.audio(audio_url, start_time=time_to_seconds(time_str))
-                            else:
-                                st.caption("Audio unavailable")
+                                    st.audio(audio_url, start_time=time_to_seconds(time_str))
+                                else:
+                                    st.caption("Audio unavailable")
 
-
+                                st.markdown("</div>", unsafe_allow_html=True)
 
             except Exception as e:
                 st.error(f"Error: {e}")
@@ -574,7 +658,7 @@ def main():
             st.success("Connected to Weaviate")
             st.caption(f"DocChunk: {'Yes' if 'DocChunk' in collections else 'No'}")
             st.caption(f"CSPC_Panels: {'Yes' if 'CSPC_Panels' in collections else 'No'}")
-        except:
+        except Exception:
             st.error("Not connected")
 
 
