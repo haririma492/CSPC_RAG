@@ -269,7 +269,7 @@ def main():
             unsafe_allow_html=True
         )
     st.markdown(
-        '<div class="banner" style="background:#005a92; font-size:1.6rem;">Phase I • CSPC 2023 Conference</div>',
+        '<div class="banner" style="background:#005a92; font-size:1.6rem;">Phase I • CSPCc 2023 Conference</div>',
         unsafe_allow_html=True)
     st.markdown(
         '<div class="banner" style="background:#c41e3a; font-size:1.6rem;"> </div>',
