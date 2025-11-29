@@ -534,41 +534,30 @@ def main():
                             rank = item["rank"]
                             target_col = chunk_col1 if idx_chunk % 2 == 0 else chunk_col2
 
-                            with target_col:
-                                # border div (if you still need it)
-                                st.markdown('<div class="chunk-root"></div>', unsafe_allow_html=True)
+                            file_name = chunk_props.get("file_name")  # e.g. "11-13-2023-CSPC-103 - ....mp3"
 
-                                st.markdown(f"**Rank #{rank}**")
-                                st.write(chunk_props.get("text", ""))
-
-                                time_str = chunk_props.get("chunk_start_time", "—")
-                                speakers_str = chunk_props.get("chunk_speakers", "—")
-
-                                if speakers_str and speakers_str != "—":
-                                    st.caption(f"Time: {time_str}")
-                                    st.caption(f"Speakers: {speakers_str}")
+                            if file_name:
+                                # Replace transcript extension with .mp3
+                                # Example: "....._transcript.txt" -> ".....mp3"
+                                if file_name.lower().endswith("_transcript.txt"):
+                                    base_name = file_name[:-len("_transcript.txt")] + ".mp3"
                                 else:
-                                    st.caption(f"Time: {time_str}")
+                                    # Fallback: ensure .mp3 extension
+                                    dot_idx = file_name.rfind(".")
+                                    if dot_idx != -1:
+                                        base_name = file_name[:dot_idx] + ".mp3"
+                                    else:
+                                        base_name = file_name + ".mp3"
 
-                                # 🔊 Build S3 URL from file_name (just change extension txt→mp3)
-                                file_name = chunk_props.get("file_name")  # e.g. "audio/11-13-2023-CSPC-103 ... .txt"
+                                # URL-encode special chars (spaces, apostrophes, etc.)
+                                safe_file_name = quote(base_name)
 
-                                if file_name and len(file_name) > 3:
-                                    # Remove last 3 chars ("txt") and replace with "mp3"
-                                    mp3_key = file_name[:-3] + "mp3"  # your exact rule
+                                audio_url = f"https://cspc-rag.s3.ca-central-1.amazonaws.com/audio/{safe_file_name}"
 
-                                    # URL-encode for safety (spaces, commas, etc.)
-                                    safe_key = urllib.parse.quote(mp3_key)
+                                st.audio(audio_url, start_time=time_to_seconds(time_str))
+                            else:
+                                st.caption("Audio unavailable")
 
-                                    # Final S3 URL
-                                    audio_url = f"https://cspc-rag.s3.ca-central-1.amazonaws.com/{safe_key}"
-
-                                    if debug_mode:
-                                        st.caption(f"S3 audio: {audio_url}")
-
-                                    st.audio(audio_url, start_time=time_to_seconds(time_str))
-                                else:
-                                    st.caption("Audio unavailable")
 
 
             except Exception as e:
