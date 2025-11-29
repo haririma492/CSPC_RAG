@@ -553,22 +553,18 @@ def main():
                                 # Build S3 URL from file_name stored in Weaviate metadata
                                 file_name = chunk_props.get("file_name")  # e.g. "11-13-2023-CSPC-103 - ....mp3"
 
+                                # Build S3 audio URL from file name stored in Weaviate
+                                file_name = chunk_props.get("file_name")
+
                                 if file_name:
-                                    # S3 object key: audio/<file_name>
-                                    s3_key = f"{S3_AUDIO_PREFIX}/{file_name}"
+                                    # IMPORTANT: Encode spaces for URLs
+                                    safe_file_name = file_name.replace(" ", "%20")
+                                    audio_url = f"https://cspc-rag.s3.ca-central-1.amazonaws.com/audio/{safe_file_name}"
 
-                                    # URL-encode the key so spaces, commas, etc. are safe in a URL
-                                    encoded_key = quote(s3_key, safe="")  # no char is left unencoded except '/'
-
-                                    audio_url = f"{S3_BASE_URL}/{encoded_key}"
-
-                                    # Streamlit can play from URL
-                                    try:
-                                        st.audio(audio_url, start_time=time_to_seconds(time_str))
-                                    except Exception as e:
-                                        st.warning(f"Audio not available for this chunk. ({e})")
+                                    st.audio(audio_url, start_time=time_to_seconds(time_str))
                                 else:
-                                    st.caption("Audio: not available")
+                                    st.caption("Audio unavailable")
+
 
             except Exception as e:
                 st.error(f"Error: {e}")
