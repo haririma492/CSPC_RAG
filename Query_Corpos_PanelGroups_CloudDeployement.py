@@ -550,16 +550,21 @@ def main():
                                 else:
                                     st.caption(f"Time: {time_str}")
 
-                                # Build S3 URL from file_name stored in Weaviate metadata
-                                file_name = chunk_props.get("file_name")  # e.g. "11-13-2023-CSPC-103 - ....mp3"
+                                # 🔊 Build S3 URL from file_name (just change extension txt→mp3)
+                                file_name = chunk_props.get("file_name")  # e.g. "audio/11-13-2023-CSPC-103 ... .txt"
 
-                                # Build S3 audio URL from file name stored in Weaviate
-                                file_name = chunk_props.get("file_name")
+                                if file_name and len(file_name) > 3:
+                                    # Remove last 3 chars ("txt") and replace with "mp3"
+                                    mp3_key = file_name[:-3] + "mp3"  # your exact rule
 
-                                if file_name:
-                                    # IMPORTANT: Encode spaces for URLs
-                                    safe_file_name = file_name.replace(" ", "%20")
-                                    audio_url = f"https://cspc-rag.s3.ca-central-1.amazonaws.com/audio/{safe_file_name}"
+                                    # URL-encode for safety (spaces, commas, etc.)
+                                    safe_key = urllib.parse.quote(mp3_key)
+
+                                    # Final S3 URL
+                                    audio_url = f"https://cspc-rag.s3.ca-central-1.amazonaws.com/{safe_key}"
+
+                                    if debug_mode:
+                                        st.caption(f"S3 audio: {audio_url}")
 
                                     st.audio(audio_url, start_time=time_to_seconds(time_str))
                                 else:
