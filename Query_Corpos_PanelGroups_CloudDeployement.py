@@ -270,6 +270,12 @@ def main():
             border-color: #17a2b8;
             color: #0c5460;
         }
+
+        .debug-warning {
+            background-color: #fff3cd;
+            border-color: #ffc107;
+            color: #856404;
+        }
     </style>
     """, unsafe_allow_html=True)
 
@@ -327,42 +333,42 @@ def main():
         weaviate_url = st.text_input(
             "Weaviate URL",
             value=os.getenv("WEAVIATE_URL", "nsrnedu9q1qfxusokfl8q.c0.us-west3.gcp.weaviate.cloud"),
-            key="weaviate_url_input"  # ADDED KEY
+            key="weaviate_url_input"
         )
 
         weaviate_key = st.text_input(
             "Weaviate Key",
             type="password",
             value=os.getenv("WEAVIATE_API_KEY", ""),
-            key="weaviate_key_input"  # ADDED KEY
+            key="weaviate_key_input"
         )
 
         openai_key = st.text_input(
             "OpenAI Key",
             type="password",
             value=os.getenv("OPENAI_API_KEY", ""),
-            key="openai_key_input"  # ADDED KEY
+            key="openai_key_input"
         )
 
         collection_name = st.text_input(
             "Chunks Collection",
             "DocChunk",
-            key="collection_name_input"  # ADDED KEY
+            key="collection_name_input"
         )
 
         st.markdown("---")
         st.subheader("Search Settings")
-        alpha = st.slider("Hybrid Alpha", 0.0, 1.0, 0.75, key="alpha_slider")  # ADDED KEY
-        top_k = st.number_input("Top Results", 1, 30, 10, key="top_k_input")  # ADDED KEY
-        use_reranker = st.checkbox("Use Reranker", True, key="use_reranker_check")  # ADDED KEY
-        use_llm = st.checkbox("Generate AI Answer", True, key="use_llm_check")  # ADDED KEY
+        alpha = st.slider("Hybrid Alpha", 0.0, 1.0, 0.75, key="alpha_slider")
+        top_k = st.number_input("Top Results", 1, 30, 10, key="top_k_input")
+        use_reranker = st.checkbox("Use Reranker", True, key="use_reranker_check")
+        use_llm = st.checkbox("Generate AI Answer", True, key="use_llm_check")
 
         st.markdown("---")
         st.subheader("Debug")
-        debug_mode = st.checkbox("Enable Debug Mode", True, key="debug_mode_check")  # ADDED KEY
-        show_audio_debug = st.checkbox("Show Audio Debug Details", True, key="show_audio_debug_check")  # ADDED KEY
-        test_s3_urls = st.checkbox("Test S3 URL Accessibility", True, key="test_s3_urls_check")  # ADDED KEY
-        show_join_details = st.checkbox("Show Join Details", False, key="show_join_details_check")  # ADDED KEY
+        debug_mode = st.checkbox("Enable Debug Mode", False, key="debug_mode_check")
+        show_audio_debug = st.checkbox("Show Audio Debug Details", True, key="show_audio_debug_check")
+        test_s3_urls = st.checkbox("Test S3 URL Accessibility", True, key="test_s3_urls_check")
+        show_join_details = st.checkbox("Show Join Details", False, key="show_join_details_check")
 
     # ========== MAIN QUESTION INPUT ==========
     _, col, _ = st.columns([0.1, 2.2, 0.1])
@@ -379,7 +385,7 @@ def main():
             "",
             placeholder="e.g. What was said about AI and scientific discovery?",
             label_visibility="collapsed",
-            key="question_input"  # ADDED KEY
+            key="question_input"
         )
 
     if "chat_history" not in st.session_state:
@@ -411,7 +417,7 @@ def main():
             selected_theme = st.selectbox(
                 "Theme",
                 theme_options,
-                key="theme",  # This key was already there
+                key="theme",
                 label_visibility="collapsed"
             )
 
@@ -449,7 +455,7 @@ def main():
             selected_panel = st.selectbox(
                 "Panel",
                 panel_options,
-                key="panel",  # This key was already there
+                key="panel",
                 label_visibility="collapsed"
             )
 
@@ -476,7 +482,7 @@ def main():
             "Search",
             type="primary",
             use_container_width=True,
-            key="search_button"  # ADDED KEY
+            key="search_button"
         )
 
     # ========== SEARCH EXECUTION ==========
@@ -745,14 +751,44 @@ def main():
 
                                         for name, url in [("V1", url_v1), ("V2", url_v2), ("V3", url_v3)]:
                                             try:
-                                                response = requests.head(url, timeout=5)
+                                                # Use GET with stream and better headers
+                                                headers = {
+                                                    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36',
+                                                    'Accept': '*/*',
+                                                    'Range': 'bytes=0-1024'  # Just get first 1KB
+                                                }
+                                                response = requests.get(url, timeout=5, stream=True, headers=headers)
                                                 status = response.status_code
+
+                                                # Check content-type
+                                                content_type = response.headers.get('Content-Type', '')
+                                                content_length = response.headers.get('Content-Length', 'unknown')
+
+                                                # 206 is "Partial Content" which is OK for Range requests
+                                                is_success = status in [200, 206]
+
                                                 url_test_results[name] = {
                                                     "status": status,
-                                                    "accessible": status == 200
+                                                    "content_type": content_type,
+                                                    "content_length": content_length,
+                                                    "accessible": is_success
                                                 }
-                                                if status == 200 and not working_url:
+
+                                                if is_success and not working_url:
                                                     working_url = url
+
+                                            except requests.exceptions.Timeout:
+                                                url_test_results[name] = {
+                                                    "status": "TIMEOUT",
+                                                    "error": "Request timed out",
+                                                    "accessible": False
+                                                }
+                                            except requests.exceptions.RequestException as e:
+                                                url_test_results[name] = {
+                                                    "status": "ERROR",
+                                                    "error": str(e),
+                                                    "accessible": False
+                                                }
                                             except Exception as e:
                                                 url_test_results[name] = {
                                                     "status": "ERROR",
@@ -765,11 +801,18 @@ def main():
                                             for name, result in url_test_results.items():
                                                 if result.get("accessible"):
                                                     st.markdown(f"✅ {name}: HTTP {result['status']} - ACCESSIBLE")
+                                                    if 'content_type' in result:
+                                                        st.caption(f"   Content-Type: {result['content_type']}")
+                                                    if 'content_length' in result:
+                                                        st.caption(
+                                                            f"   Content-Length: {result['content_length']} bytes")
                                                 else:
                                                     st.markdown(
                                                         f"❌ {name}: {result.get('status', 'ERROR')} - NOT ACCESSIBLE")
                                                     if 'error' in result:
                                                         st.caption(f"   Error: {result['error']}")
+                                                    if 'content_type' in result:
+                                                        st.caption(f"   Content-Type: {result['content_type']}")
 
                                     # Use working URL or default to V2
                                     final_url = working_url if working_url else url_v2
@@ -777,12 +820,13 @@ def main():
                                     if show_audio_debug:
                                         if working_url:
                                             st.markdown(
-                                                f'<div class="debug-box debug-success">✅ Using working URL: {final_url}</div>',
+                                                f'<div class="debug-box debug-success">✅ Using verified working URL</div>',
                                                 unsafe_allow_html=True)
                                         else:
                                             st.markdown(
-                                                f'<div class="debug-box debug-error">⚠️ No working URL found. Trying default: {final_url}</div>',
+                                                f'<div class="debug-box debug-warning">⚠️ No URL verified via requests library. Using default URL - audio player may still work!</div>',
                                                 unsafe_allow_html=True)
+                                        st.code(f"Final URL: {final_url}")
                                         st.markdown('</div>', unsafe_allow_html=True)
 
                                     # Render audio player
@@ -791,7 +835,7 @@ def main():
 
                                         if show_audio_debug:
                                             st.markdown(
-                                                '<div class="debug-box debug-success">✅ Audio player rendered successfully</div>',
+                                                '<div class="debug-box debug-success">✅ Audio player rendered - try playing it!</div>',
                                                 unsafe_allow_html=True)
                                     except Exception as e:
                                         st.error(f"❌ Audio player error: {str(e)}")
@@ -826,6 +870,9 @@ def main():
         except Exception:
             st.error("Not connected")
 
+
+if __name__ == "__main__":
+    main()
 
 if __name__ == "__main__":
     main()
