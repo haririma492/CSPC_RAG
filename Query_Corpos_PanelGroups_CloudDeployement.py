@@ -198,7 +198,7 @@ def time_to_seconds(time_str):
 # MAIN APP
 # ========================
 def main():
-    # ========== CUSTOM CSS (Fixed & Improved Chunk Border) ==========
+    # ========== CUSTOM CSS ==========
     st.markdown("""
     <style>
         .main > div {padding-top:0!important;}
@@ -208,7 +208,7 @@ def main():
         .panel-header {background:#f0f2f6; padding:15px; border-radius:10px; margin:10px 0;}
         .photo-container {border: 2px solid #ddd; border-radius: 8px; padding: 5px;}
 
-        /* Larger text everywhere – BUT DO NOT TOUCH div */
+        /* Larger text everywhere */
         p, li, span, label {font-size: 1.3rem !important;}
 
         .panel-metadata {font-size: 1.9rem !important; line-height: 2.4;}
@@ -220,7 +220,7 @@ def main():
         button {font-size: 1.3rem !important;}
         audio {width: 100%;}
 
-        /* Thin border around each chunk */
+        /* Chunk border */
         .chunk-root {
             border: 1px solid #ccc;
             border-radius: 6px;
@@ -241,10 +241,55 @@ def main():
             border-top: 2px solid #ccc;
             margin: 2rem 0;
         }
+
+        /* Debug styling */
+        .debug-box {
+            background-color: #fff3cd;
+            border: 2px solid #ffc107;
+            border-radius: 8px;
+            padding: 15px;
+            margin: 10px 0;
+            font-family: monospace;
+            font-size: 0.9rem;
+        }
+
+        .debug-success {
+            background-color: #d4edda;
+            border-color: #28a745;
+            color: #155724;
+        }
+
+        .debug-error {
+            background-color: #f8d7da;
+            border-color: #dc3545;
+            color: #721c24;
+        }
+
+        .debug-info {
+            background-color: #d1ecf1;
+            border-color: #17a2b8;
+            color: #0c5460;
+        }
     </style>
     """, unsafe_allow_html=True)
 
-    # Header
+    # ========== HELPER FUNCTION: time_to_seconds ==========
+    def time_to_seconds(time_str):
+        """Convert HH:MM:SS or MM:SS to seconds."""
+        if not time_str or time_str == "—":
+            return 0
+        try:
+            parts = time_str.split(":")
+            if len(parts) == 3:  # HH:MM:SS
+                return int(parts[0]) * 3600 + int(parts[1]) * 60 + int(parts[2])
+            elif len(parts) == 2:  # MM:SS
+                return int(parts[0]) * 60 + int(parts[1])
+            else:
+                return 0
+        except (ValueError, AttributeError):
+            return 0
+
+    # ========== HEADER ==========
     col1, col2 = st.columns([1.3, 4])
     with col1:
         st.image("https://sciencepolicy.ca/wp-content/uploads/2020/09/cspc-logo.png", width=300)
@@ -268,14 +313,15 @@ def main():
             """,
             unsafe_allow_html=True
         )
+
     st.markdown(
-        '<div class="banner" style="background:#005a92; font-size:1.6rem;">Phase I • CSPCc 2023 Conference</div>',
+        '<div class="banner" style="background:#005a92; font-size:1.6rem;">Phase I • CSPC 2023 Conference</div>',
         unsafe_allow_html=True)
     st.markdown(
         '<div class="banner" style="background:#c41e3a; font-size:1.6rem;"> </div>',
         unsafe_allow_html=True)
 
-    # Sidebar
+    # ========== SIDEBAR ==========
     with st.sidebar:
         st.header("Configuration")
         weaviate_url = st.text_input(
@@ -306,10 +352,12 @@ def main():
 
         st.markdown("---")
         st.subheader("Debug")
-        debug_mode = st.checkbox("Enable Debug Mode", False)
+        debug_mode = st.checkbox("Enable Debug Mode", True)  # DEFAULT ON
+        show_audio_debug = st.checkbox("Show Audio Debug Details", True)  # NEW
+        test_s3_urls = st.checkbox("Test S3 URL Accessibility", True)  # NEW
         show_join_details = st.checkbox("Show Join Details", False)
 
-    # Main Question Input
+    # ========== MAIN QUESTION INPUT ==========
     _, col, _ = st.columns([0.1, 2.2, 0.1])
     with col:
         st.write("")
@@ -329,7 +377,7 @@ def main():
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
 
-    # Connect to Weaviate
+    # ========== CONNECT TO WEAVIATE ==========
     try:
         client = get_client(weaviate_url, weaviate_key)
         docchunk_coll = get_collection(client, collection_name)
@@ -340,9 +388,8 @@ def main():
         st.error(f"Failed to connect to Weaviate: {e}")
         st.stop()
 
-    # Filters - DYNAMIC with dependent dropdowns
+    # ========== FILTERS ==========
     with col:
-        # Fetch available options
         available_themes = get_all_themes(client)
         all_panels = get_all_panels(client)
 
@@ -361,7 +408,6 @@ def main():
                 unsafe_allow_html=True
             )
 
-            # Filter panels based on selected theme
             if selected_theme == "All":
                 filtered_panels = all_panels
             else:
@@ -389,7 +435,7 @@ def main():
             panel_options = ["All"] + [display for _, display in filtered_panels]
             selected_panel = st.selectbox("Panel", panel_options, key="panel", label_visibility="collapsed")
 
-    # Search button
+    # ========== SEARCH BUTTON ==========
     _, btn_col, _ = st.columns([1.5, 1, 1.5])
     with btn_col:
         st.markdown("""
@@ -410,6 +456,7 @@ def main():
         """, unsafe_allow_html=True)
         search_clicked = st.button("Search", type="primary", use_container_width=True)
 
+    # ========== SEARCH EXECUTION ==========
     if search_clicked:
         if not question.strip():
             st.warning("Please enter a question.")
@@ -456,6 +503,16 @@ def main():
                     ]
                 )
                 objects = list(res.objects)
+
+                # DEBUG: Show raw results
+                if debug_mode:
+                    st.markdown('<div class="debug-box debug-info">', unsafe_allow_html=True)
+                    st.markdown("### 🔍 DEBUG: Raw Search Results")
+                    st.write(f"**Total results returned:** {len(objects)}")
+                    if objects:
+                        st.write("**First result properties:**")
+                        st.json(objects[0].properties)
+                    st.markdown('</div>', unsafe_allow_html=True)
 
                 # Rerank
                 if use_reranker and objects:
@@ -527,11 +584,12 @@ def main():
                         panel_order.append((panel_code, best_rank, items))
                     panel_order.sort(key=lambda x: x[1])
 
+                    # ========== RENDER PANELS ==========
                     for idx_panel, (panel_code, best_rank, items) in enumerate(panel_order):
                         if idx_panel > 0:
                             st.markdown('<hr class="panel-separator">', unsafe_allow_html=True)
 
-                        first_chunk = items[0].get("obj").properties
+                        first_chunk = items[0]["obj"].properties
                         panel_metadata = get_panel_metadata_from_cspc_panels(client, panel_code)
 
                         # Panel header with photo
@@ -594,6 +652,7 @@ def main():
                         sorted_items = sorted(items, key=lambda x: x["rank"])
                         chunk_col1, chunk_col2 = st.columns(2)
 
+                        # ========== RENDER CHUNKS WITH AUDIO ==========
                         for idx_chunk, item in enumerate(sorted_items):
                             chunk_props = item["obj"].properties
                             rank = item["rank"]
@@ -606,7 +665,12 @@ def main():
                                 st.write(chunk_props.get("text", ""))
 
                                 # Get timestamp
-                                time_str = chunk_props.get("chunk_start_time") or "00:00:00"
+                                raw_time = chunk_props.get("chunk_start_time")
+                                if not raw_time or raw_time == "—":
+                                    time_str = "00:00:00"
+                                else:
+                                    time_str = raw_time
+
                                 speakers_str = chunk_props.get("chunk_speakers") or "—"
 
                                 # Display metadata
@@ -616,27 +680,109 @@ def main():
                                 else:
                                     st.caption(f"Time: {time_str}")
 
-                                # Build S3 audio URL
-                                file_name = chunk_props.get("file_name")  # e.g., "Panel_123.txt"
+                                # ========== AUDIO HANDLING WITH DEBUG ==========
+                                file_name = chunk_props.get("file_name")
+
+                                if show_audio_debug:
+                                    st.markdown('<div class="debug-box debug-info">', unsafe_allow_html=True)
+                                    st.markdown("**🔊 AUDIO DEBUG INFO**")
+                                    st.code(f"file_name from DB: {file_name}")
+                                    st.code(f"panel_code: {panel_code}")
+                                    st.code(f"chunk_start_time: {time_str}")
+                                    st.code(f"time_in_seconds: {time_to_seconds(time_str)}")
 
                                 if file_name:
-                                    # Remove extension and add .mp3
+                                    # Method 1: Convert file_name to audio filename
                                     base_name = os.path.splitext(file_name)[0]
-                                    audio_file_name = f"{base_name}.mp3"
+                                    audio_file_v1 = f"{base_name}.mp3"
 
-                                    # URL-encode for S3
-                                    safe_file_name = quote(audio_file_name)
+                                    # Method 2: Use panel_code directly
+                                    audio_file_v2 = f"Panel_{panel_code}.mp3"
 
-                                    audio_url = f"https://cspc-rag.s3.ca-central-1.amazonaws.com/audio/{safe_file_name}"
+                                    # Method 3: Try without "Panel_" prefix
+                                    audio_file_v3 = f"{panel_code}.mp3"
 
+                                    # Build all possible URLs
+                                    url_v1 = f"https://cspc-rag.s3.ca-central-1.amazonaws.com/audio/{quote(audio_file_v1)}"
+                                    url_v2 = f"https://cspc-rag.s3.ca-central-1.amazonaws.com/audio/{quote(audio_file_v2)}"
+                                    url_v3 = f"https://cspc-rag.s3.ca-central-1.amazonaws.com/audio/{quote(audio_file_v3)}"
+
+                                    if show_audio_debug:
+                                        st.markdown("**Attempted Audio URLs:**")
+                                        st.code(f"V1 (from file_name): {url_v1}")
+                                        st.code(f"V2 (Panel_XXX): {url_v2}")
+                                        st.code(f"V3 (XXX only): {url_v3}")
+
+                                    # Test URLs if enabled
+                                    working_url = None
+                                    url_test_results = {}
+
+                                    if test_s3_urls:
+                                        import requests
+
+                                        for name, url in [("V1", url_v1), ("V2", url_v2), ("V3", url_v3)]:
+                                            try:
+                                                response = requests.head(url, timeout=5)
+                                                status = response.status_code
+                                                url_test_results[name] = {
+                                                    "status": status,
+                                                    "accessible": status == 200
+                                                }
+                                                if status == 200 and not working_url:
+                                                    working_url = url
+                                            except Exception as e:
+                                                url_test_results[name] = {
+                                                    "status": "ERROR",
+                                                    "error": str(e),
+                                                    "accessible": False
+                                                }
+
+                                        if show_audio_debug:
+                                            st.markdown("**URL Test Results:**")
+                                            for name, result in url_test_results.items():
+                                                if result.get("accessible"):
+                                                    st.markdown(f"✅ {name}: HTTP {result['status']} - ACCESSIBLE")
+                                                else:
+                                                    st.markdown(
+                                                        f"❌ {name}: {result.get('status', 'ERROR')} - NOT ACCESSIBLE")
+                                                    if 'error' in result:
+                                                        st.caption(f"   Error: {result['error']}")
+
+                                    # Use working URL or default to V2
+                                    final_url = working_url if working_url else url_v2
+
+                                    if show_audio_debug:
+                                        if working_url:
+                                            st.markdown(
+                                                f'<div class="debug-box debug-success">✅ Using working URL: {final_url}</div>',
+                                                unsafe_allow_html=True)
+                                        else:
+                                            st.markdown(
+                                                f'<div class="debug-box debug-error">⚠️ No working URL found. Trying default: {final_url}</div>',
+                                                unsafe_allow_html=True)
+                                        st.markdown('</div>', unsafe_allow_html=True)
+
+                                    # Render audio player
                                     try:
-                                        # Convert timestamp to seconds
-                                        start_seconds = time_to_seconds(time_str)
-                                        st.audio(audio_url, start_time=start_seconds)
+                                        st.audio(final_url, start_time=time_to_seconds(time_str))
+
+                                        if show_audio_debug:
+                                            st.markdown(
+                                                '<div class="debug-box debug-success">✅ Audio player rendered successfully</div>',
+                                                unsafe_allow_html=True)
                                     except Exception as e:
-                                        st.caption(f"⚠️ Audio unavailable: {str(e)}")
+                                        st.error(f"❌ Audio player error: {str(e)}")
+                                        if show_audio_debug:
+                                            st.markdown(
+                                                f'<div class="debug-box debug-error">Error details: {str(e)}</div>',
+                                                unsafe_allow_html=True)
+
                                 else:
-                                    st.caption("⚠️ Audio file not found")
+                                    st.caption("⚠️ No file_name in database")
+                                    if show_audio_debug:
+                                        st.markdown(
+                                            '<div class="debug-box debug-error">❌ file_name is missing from chunk properties</div>',
+                                            unsafe_allow_html=True)
 
                                 st.markdown("</div>", unsafe_allow_html=True)
 
@@ -645,7 +791,7 @@ def main():
                 if debug_mode:
                     st.exception(e)
 
-    # Sidebar status
+    # ========== SIDEBAR STATUS ==========
     with st.sidebar:
         st.markdown("---")
         st.markdown("### Status")
@@ -657,6 +803,9 @@ def main():
         except Exception:
             st.error("Not connected")
 
+
+if __name__ == "__main__":
+    main()
 
 if __name__ == "__main__":
     main()
