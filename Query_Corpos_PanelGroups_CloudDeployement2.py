@@ -11,13 +11,6 @@ from weaviate import connect_to_wcs
 from weaviate.classes.init import Auth
 from weaviate.classes.query import Filter, MetadataQuery
 from sentence_transformers import CrossEncoder
-from urllib.parse import quote
-
-S3_BUCKET = "cspc-rag"
-S3_REGION = "ca-central-1"
-S3_BASE_URL = f"https://{S3_BUCKET}.s3.{S3_REGION}.amazonaws.com"
-S3_AUDIO_PREFIX = "audio"   # folder in the bucket
-
 
 # ========================
 # CONFIG & PAGE SETUP
@@ -535,40 +528,24 @@ def main():
                             target_col = chunk_col1 if idx_chunk % 2 == 0 else chunk_col2
 
                             with target_col:
-                                # border div (if you still need it)
+                                # THIS IS THE ONLY LINE YOU NEED FOR THE BORDER
                                 st.markdown('<div class="chunk-root"></div>', unsafe_allow_html=True)
 
                                 st.markdown(f"**Rank #{rank}**")
                                 st.write(chunk_props.get("text", ""))
 
-                                time_str = chunk_props.get("chunk_start_time", "—")
-                                speakers_str = chunk_props.get("chunk_speakers", "—")
+                                time_str = chunk_props.get('chunk_start_time', '—')
+                                speakers_str = chunk_props.get('chunk_speakers', '—')
 
-                                if speakers_str and speakers_str != "—":
+                                if speakers_str and speakers_str != '—':
                                     st.caption(f"Time: {time_str}")
                                     st.caption(f"Speakers: {speakers_str}")
                                 else:
                                     st.caption(f"Time: {time_str}")
 
-                                # Build S3 URL from file_name stored in Weaviate metadata
-                                file_name = chunk_props.get("file_name")  # e.g. "11-13-2023-CSPC-103 - ....mp3"
-
-                                if file_name:
-                                    # S3 object key: audio/<file_name>
-                                    s3_key = f"{S3_AUDIO_PREFIX}/{file_name}"
-
-                                    # URL-encode the key so spaces, commas, etc. are safe in a URL
-                                    encoded_key = quote(s3_key, safe="")  # no char is left unencoded except '/'
-
-                                    audio_url = f"{S3_BASE_URL}/{encoded_key}"
-
-                                    # Streamlit can play from URL
-                                    try:
-                                        st.audio(audio_url, start_time=time_to_seconds(time_str))
-                                    except Exception as e:
-                                        st.warning(f"Audio not available for this chunk. ({e})")
-                                else:
-                                    st.caption("Audio: not available")
+                                audio_path = find_audio_file(chunk_props.get("file_name"))
+                                if audio_path:
+                                    st.audio(audio_path, start_time=time_to_seconds(time_str))
 
             except Exception as e:
                 st.error(f"Error: {e}")
