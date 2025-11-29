@@ -179,19 +179,20 @@ def find_audio_file(name: str) -> Optional[str]:
     return None
 
 
-def time_to_seconds(t: str) -> int:
-    if not t or t in ("N/A", "—", "", "0"):
+def time_to_seconds(time_str):
+    """Convert HH:MM:SS or MM:SS to seconds."""
+    if not time_str or time_str == "—":
         return 0
     try:
-        parts = [int(x) for x in t.replace(".", ":").split(":") if x.isdigit()]
-        if len(parts) == 3:
-            return parts[0] * 3600 + parts[1] * 60 + parts[2]
-        if len(parts) == 2:
-            return parts[0] * 60 + parts[1]
-        return parts[0]
-    except:
+        parts = time_str.split(":")
+        if len(parts) == 3:  # HH:MM:SS
+            return int(parts[0]) * 3600 + int(parts[1]) * 60 + int(parts[2])
+        elif len(parts) == 2:  # MM:SS
+            return int(parts[0]) * 60 + int(parts[1])
+        else:
+            return 0
+    except (ValueError, AttributeError):
         return 0
-
 
 # ========================
 # MAIN APP
@@ -604,43 +605,38 @@ def main():
                                 st.markdown(f"**Rank #{rank}**")
                                 st.write(chunk_props.get("text", ""))
 
-                                # --- Always define time_str here ---
-                                raw_time = chunk_props.get("chunk_start_time")
-                                if not raw_time or raw_time == "—":
-                                    time_str = "00:00:00"
-                                else:
-                                    time_str = raw_time
-
+                                # Get timestamp
+                                time_str = chunk_props.get("chunk_start_time") or "00:00:00"
                                 speakers_str = chunk_props.get("chunk_speakers") or "—"
 
+                                # Display metadata
                                 if speakers_str != "—":
                                     st.caption(f"Time: {time_str}")
                                     st.caption(f"Speakers: {speakers_str}")
                                 else:
                                     st.caption(f"Time: {time_str}")
 
-                                # --- Build S3 audio URL from file_name in DocChunk ---
-                                file_name = chunk_props.get("file_name")  # transcript file name
+                                # Build S3 audio URL
+                                file_name = chunk_props.get("file_name")  # e.g., "Panel_123.txt"
 
                                 if file_name:
-                                    # Swap extension to .mp3 (your rule: txt -> mp3)
-                                    base, ext = os.path.splitext(file_name)
-                                    if ext.lower() == ".txt":
-                                        audio_file_name = base + ".mp3"
-                                    else:
-                                        # fallback – still force .mp3 per your rule
-                                        audio_file_name = file_name[:-3] + "mp3" if len(file_name) > 3 else file_name + ".mp3"
+                                    # Remove extension and add .mp3
+                                    base_name = os.path.splitext(file_name)[0]
+                                    audio_file_name = f"{base_name}.mp3"
 
-                                    # URL-encode for S3 path
+                                    # URL-encode for S3
                                     safe_file_name = quote(audio_file_name)
 
-                                    audio_url = (
-                                        f"https://cspc-rag.s3.ca-central-1.amazonaws.com/audio/{safe_file_name}"
-                                    )
+                                    audio_url = f"https://cspc-rag.s3.ca-central-1.amazonaws.com/audio/{safe_file_name}"
 
-                                    st.audio(audio_url, start_time=time_to_seconds(time_str))
+                                    try:
+                                        # Convert timestamp to seconds
+                                        start_seconds = time_to_seconds(time_str)
+                                        st.audio(audio_url, start_time=start_seconds)
+                                    except Exception as e:
+                                        st.caption(f"⚠️ Audio unavailable: {str(e)}")
                                 else:
-                                    st.caption("Audio unavailable")
+                                    st.caption("⚠️ Audio file not found")
 
                                 st.markdown("</div>", unsafe_allow_html=True)
 
