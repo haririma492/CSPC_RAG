@@ -179,14 +179,6 @@ def find_audio_file(name: str) -> Optional[str]:
     return None
 
 
-import streamlit as st
-import os
-import re
-from collections import defaultdict
-from urllib.parse import quote
-from openai import OpenAI
-from sentence_transformers import CrossEncoder
-from weaviate.classes.query import MetadataQuery, Filter
 
 
 # Import your helper functions (these should be at the top of your file)
