@@ -327,35 +327,42 @@ def main():
         weaviate_url = st.text_input(
             "Weaviate URL",
             value=os.getenv("WEAVIATE_URL", "nsrnedu9q1qfxusokfl8q.c0.us-west3.gcp.weaviate.cloud"),
+            key="weaviate_url_input"  # ADDED KEY
         )
 
         weaviate_key = st.text_input(
             "Weaviate Key",
             type="password",
             value=os.getenv("WEAVIATE_API_KEY", ""),
+            key="weaviate_key_input"  # ADDED KEY
         )
 
         openai_key = st.text_input(
             "OpenAI Key",
             type="password",
             value=os.getenv("OPENAI_API_KEY", ""),
+            key="openai_key_input"  # ADDED KEY
         )
 
-        collection_name = st.text_input("Chunks Collection", "DocChunk")
+        collection_name = st.text_input(
+            "Chunks Collection",
+            "DocChunk",
+            key="collection_name_input"  # ADDED KEY
+        )
 
         st.markdown("---")
         st.subheader("Search Settings")
-        alpha = st.slider("Hybrid Alpha", 0.0, 1.0, 0.75)
-        top_k = st.number_input("Top Results", 1, 30, 10)
-        use_reranker = st.checkbox("Use Reranker", True)
-        use_llm = st.checkbox("Generate AI Answer", True)
+        alpha = st.slider("Hybrid Alpha", 0.0, 1.0, 0.75, key="alpha_slider")  # ADDED KEY
+        top_k = st.number_input("Top Results", 1, 30, 10, key="top_k_input")  # ADDED KEY
+        use_reranker = st.checkbox("Use Reranker", True, key="use_reranker_check")  # ADDED KEY
+        use_llm = st.checkbox("Generate AI Answer", True, key="use_llm_check")  # ADDED KEY
 
         st.markdown("---")
         st.subheader("Debug")
-        debug_mode = st.checkbox("Enable Debug Mode", True)  # DEFAULT ON
-        show_audio_debug = st.checkbox("Show Audio Debug Details", True)  # NEW
-        test_s3_urls = st.checkbox("Test S3 URL Accessibility", True)  # NEW
-        show_join_details = st.checkbox("Show Join Details", False)
+        debug_mode = st.checkbox("Enable Debug Mode", True, key="debug_mode_check")  # ADDED KEY
+        show_audio_debug = st.checkbox("Show Audio Debug Details", True, key="show_audio_debug_check")  # ADDED KEY
+        test_s3_urls = st.checkbox("Test S3 URL Accessibility", True, key="test_s3_urls_check")  # ADDED KEY
+        show_join_details = st.checkbox("Show Join Details", False, key="show_join_details_check")  # ADDED KEY
 
     # ========== MAIN QUESTION INPUT ==========
     _, col, _ = st.columns([0.1, 2.2, 0.1])
@@ -371,7 +378,8 @@ def main():
         question = st.text_input(
             "",
             placeholder="e.g. What was said about AI and scientific discovery?",
-            label_visibility="collapsed"
+            label_visibility="collapsed",
+            key="question_input"  # ADDED KEY
         )
 
     if "chat_history" not in st.session_state:
@@ -400,7 +408,12 @@ def main():
                 unsafe_allow_html=True
             )
             theme_options = ["All"] + available_themes
-            selected_theme = st.selectbox("Theme", theme_options, key="theme", label_visibility="collapsed")
+            selected_theme = st.selectbox(
+                "Theme",
+                theme_options,
+                key="theme",  # This key was already there
+                label_visibility="collapsed"
+            )
 
         with c2:
             st.markdown(
@@ -433,7 +446,12 @@ def main():
                     filtered_panels = all_panels
 
             panel_options = ["All"] + [display for _, display in filtered_panels]
-            selected_panel = st.selectbox("Panel", panel_options, key="panel", label_visibility="collapsed")
+            selected_panel = st.selectbox(
+                "Panel",
+                panel_options,
+                key="panel",  # This key was already there
+                label_visibility="collapsed"
+            )
 
     # ========== SEARCH BUTTON ==========
     _, btn_col, _ = st.columns([1.5, 1, 1.5])
@@ -454,7 +472,12 @@ def main():
         }
         </style>
         """, unsafe_allow_html=True)
-        search_clicked = st.button("Search", type="primary", use_container_width=True)
+        search_clicked = st.button(
+            "Search",
+            type="primary",
+            use_container_width=True,
+            key="search_button"  # ADDED KEY
+        )
 
     # ========== SEARCH EXECUTION ==========
     if search_clicked:
@@ -803,9 +826,6 @@ def main():
         except Exception:
             st.error("Not connected")
 
-
-if __name__ == "__main__":
-    main()
 
 if __name__ == "__main__":
     main()
