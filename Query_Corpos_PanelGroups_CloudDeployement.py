@@ -1,3 +1,199 @@
+# app.py - CSPC 2023 AI Search with PROPER JOIN between DocChunk and CSPC_Panels
+
+import os
+import re
+from typing import Optional
+from collections import defaultdict
+
+import streamlit as st
+from openai import OpenAI
+from weaviate import connect_to_wcs
+from weaviate.classes.init import Auth
+from weaviate.classes.query import Filter, MetadataQuery
+from sentence_transformers import CrossEncoder
+from urllib.parse import quote
+
+S3_BUCKET = "cspc-rag"
+S3_REGION = "ca-central-1"
+S3_BASE_URL = f"https://{S3_BUCKET}.s3.{S3_REGION}.amazonaws.com"
+S3_AUDIO_PREFIX = "audio"  # folder in the bucket
+
+# ========================
+# CONFIG & PAGE SETUP
+# ========================
+st.set_page_config(
+    page_title="CSPC 2023 AI Search",
+    layout="wide",
+    initial_sidebar_state="expanded"
+)
+
+AUDIO_DIR = r"D:\Downloads\AllDays"
+
+
+# ========================
+# WEAVIATE CLIENT
+# ========================
+@st.cache_resource(show_spinner=False)
+def get_client(_url: str, _key: str):
+    return connect_to_wcs(cluster_url=_url, auth_credentials=Auth.api_key(_key))
+
+
+@st.cache_resource(show_spinner=False)
+def get_collection(_client, _name: str):
+    return _client.collections.get(_name)
+
+
+# ========================
+# PANEL METADATA RETRIEVAL FROM CSPC_PANELS
+# ========================
+def get_panel_metadata_from_cspc_panels(client, panel_code: str) -> dict:
+    """
+    Fetch panel metadata including photo_url from CSPC_Panels collection.
+    This is a SEPARATE collection from DocChunk.
+
+    Args:
+        client: Weaviate client
+        panel_code: Panel code (e.g., "333", "11", "101")
+
+    Returns:
+        dict with title, photo_url, speaker_photo_url, organized_by, speakers, etc.
+    """
+    if not panel_code:
+        return {}
+
+    try:
+        panels_coll = client.collections.get("CSPC_Panels")
+
+        # Try string panel_code first
+        try:
+            response = panels_coll.query.fetch_objects(
+                filters=Filter.by_property("panel_code").equal(str(panel_code)),
+                limit=1
+            )
+        except:
+            # If string fails, try integer
+            try:
+                response = panels_coll.query.fetch_objects(
+                    filters=Filter.by_property("panel_code").equal(int(panel_code)),
+                    limit=1
+                )
+            except Exception as e:
+                st.sidebar.warning(f"Could not query CSPC_Panels for panel {panel_code}: {e}")
+                return {}
+
+        if not response.objects:
+            return {}
+
+        panel_data = response.objects[0].properties
+
+        # Extract and clean data
+        def _first_or_value(val):
+            """Handle list fields - take first item if it's a list"""
+            if isinstance(val, list):
+                return val[0] if val else None
+            return val
+
+        return {
+            "panel_code": panel_data.get("panel_code"),
+            "title": panel_data.get("title", ""),
+            "theme": panel_data.get("theme", ""),
+            "photo_url": _first_or_value(panel_data.get("photo_url")),
+            "speaker_photo_url": _first_or_value(panel_data.get("speaker_photo_url")),
+            "organized_by": panel_data.get("organized_by") or panel_data.get("panel_organized_by", ""),
+            "speakers": panel_data.get("speakers", []),
+            "panel_date": panel_data.get("panel_date", ""),
+            "abstract": panel_data.get("abstract", ""),
+            "panel_url": panel_data.get("panel_url", ""),
+            "external_details_url": panel_data.get("external_details_url", ""),
+            "_raw": panel_data  # Keep for debugging
+        }
+
+    except Exception as e:
+        st.sidebar.error(f"Error fetching CSPC_Panels data for panel {panel_code}: {e}")
+        return {}
+
+
+# ========================
+# DYNAMIC FILTERS FROM DATA
+# ========================
+@st.cache_data(ttl=3600, show_spinner=False)
+def get_all_themes(_client) -> list:
+    """Fetch all unique themes from CSPC_Panels collection"""
+    try:
+        panels_coll = _client.collections.get("CSPC_Panels")
+        response = panels_coll.query.fetch_objects(limit=1000)
+
+        themes = set()
+        for obj in response.objects:
+            theme = obj.properties.get("theme")
+            if theme:
+                themes.add(theme)
+
+        return sorted(list(themes))
+    except Exception as e:
+        st.sidebar.warning(f"Could not fetch themes: {e}")
+        return []
+
+
+@st.cache_data(ttl=3600, show_spinner=False)
+def get_all_panels(_client) -> list:
+    """Fetch all unique panel codes from CSPC_Panels collection"""
+    try:
+        panels_coll = _client.collections.get("CSPC_Panels")
+        response = panels_coll.query.fetch_objects(limit=1000)
+
+        panels = []
+        for obj in response.objects:
+            panel_code = obj.properties.get("panel_code")
+            title = obj.properties.get("title", "")
+            if panel_code:
+                # Format: "Panel 333 - Title"
+                display = f"Panel {panel_code}"
+                if title:
+                    display += f" - {title[:50]}..." if len(title) > 50 else f" - {title}"
+                panels.append((str(panel_code), display))
+
+        # Sort by panel code (numerically)
+        panels.sort(key=lambda x: int(x[0]) if x[0].isdigit() else 999999)
+
+        return panels
+    except Exception as e:
+        st.sidebar.warning(f"Could not fetch panels: {e}")
+        return []
+
+
+# ========================
+# AUDIO HELPERS
+# ========================
+def find_audio_file(name: str) -> Optional[str]:
+    if not name:
+        return None
+    base = name
+    for suf in ["_transcript.txt", ".txt", "_transcript"]:
+        base = base.removesuffix(suf)
+    for ext in [".mp3", ".MP3", ".wav", ".WAV"]:
+        path = os.path.join(AUDIO_DIR, base + ext)
+        if os.path.exists(path):
+            return path
+    return None
+
+
+def time_to_seconds(time_str):
+    """Convert HH:MM:SS or MM:SS to seconds."""
+    if not time_str or time_str == "—":
+        return 0
+    try:
+        parts = time_str.split(":")
+        if len(parts) == 3:  # HH:MM:SS
+            return int(parts[0]) * 3600 + int(parts[1]) * 60 + int(parts[2])
+        elif len(parts) == 2:  # MM:SS
+            return int(parts[0]) * 60 + int(parts[1])
+        else:
+            return 0
+    except (ValueError, AttributeError):
+        return 0
+
+
 def main():
     # ========== CUSTOM CSS (FIXED - Removed empty box) ==========
     st.markdown("""
@@ -172,7 +368,7 @@ def main():
         )
 
         question = st.text_input(
-            "",
+            "Question",  # Fixed: Added label instead of empty string
             placeholder="e.g. What was said about AI and scientific discovery?",
             label_visibility="collapsed",
             key="main_question"
@@ -422,7 +618,7 @@ def main():
                             photo_url = panel_metadata.get("speaker_photo_url") or panel_metadata.get("photo_url")
                             if photo_url:
                                 try:
-                                    st.image(photo_url, use_column_width=True, caption=f"Panel {panel_code}")
+                                    st.image(photo_url, use_container_width=True, caption=f"Panel {panel_code}")
                                 except Exception:
                                     st.info("No photo available")
                             else:
