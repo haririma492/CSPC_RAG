@@ -1,201 +1,5 @@
-# app.py - CSPC 2023 AI Search with PROPER JOIN between DocChunk and CSPC_Panels
-
-import os
-import re
-from typing import Optional
-from collections import defaultdict
-
-import streamlit as st
-from openai import OpenAI
-from weaviate import connect_to_wcs
-from weaviate.classes.init import Auth
-from weaviate.classes.query import Filter, MetadataQuery
-from sentence_transformers import CrossEncoder
-from urllib.parse import quote
-
-S3_BUCKET = "cspc-rag"
-S3_REGION = "ca-central-1"
-S3_BASE_URL = f"https://{S3_BUCKET}.s3.{S3_REGION}.amazonaws.com"
-S3_AUDIO_PREFIX = "audio"  # folder in the bucket
-
-# ========================
-# CONFIG & PAGE SETUP
-# ========================
-st.set_page_config(
-    page_title="CSPC 2023 AI Search",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
-
-AUDIO_DIR = r"D:\Downloads\AllDays"
-
-
-# ========================
-# WEAVIATE CLIENT
-# ========================
-@st.cache_resource(show_spinner=False)
-def get_client(_url: str, _key: str):
-    return connect_to_wcs(cluster_url=_url, auth_credentials=Auth.api_key(_key))
-
-
-@st.cache_resource(show_spinner=False)
-def get_collection(_client, _name: str):
-    return _client.collections.get(_name)
-
-
-# ========================
-# PANEL METADATA RETRIEVAL FROM CSPC_PANELS
-# ========================
-def get_panel_metadata_from_cspc_panels(client, panel_code: str) -> dict:
-    """
-    Fetch panel metadata including photo_url from CSPC_Panels collection.
-    This is a SEPARATE collection from DocChunk.
-
-    Args:
-        client: Weaviate client
-        panel_code: Panel code (e.g., "333", "11", "101")
-
-    Returns:
-        dict with title, photo_url, speaker_photo_url, organized_by, speakers, etc.
-    """
-    if not panel_code:
-        return {}
-
-    try:
-        panels_coll = client.collections.get("CSPC_Panels")
-
-        # Try string panel_code first
-        try:
-            response = panels_coll.query.fetch_objects(
-                filters=Filter.by_property("panel_code").equal(str(panel_code)),
-                limit=1
-            )
-        except:
-            # If string fails, try integer
-            try:
-                response = panels_coll.query.fetch_objects(
-                    filters=Filter.by_property("panel_code").equal(int(panel_code)),
-                    limit=1
-                )
-            except Exception as e:
-                st.sidebar.warning(f"Could not query CSPC_Panels for panel {panel_code}: {e}")
-                return {}
-
-        if not response.objects:
-            return {}
-
-        panel_data = response.objects[0].properties
-
-        # Extract and clean data
-        def _first_or_value(val):
-            """Handle list fields - take first item if it's a list"""
-            if isinstance(val, list):
-                return val[0] if val else None
-            return val
-
-        return {
-            "panel_code": panel_data.get("panel_code"),
-            "title": panel_data.get("title", ""),
-            "theme": panel_data.get("theme", ""),
-            "photo_url": _first_or_value(panel_data.get("photo_url")),
-            "speaker_photo_url": _first_or_value(panel_data.get("speaker_photo_url")),
-            "organized_by": panel_data.get("organized_by") or panel_data.get("panel_organized_by", ""),
-            "speakers": panel_data.get("speakers", []),
-            "panel_date": panel_data.get("panel_date", ""),
-            "abstract": panel_data.get("abstract", ""),
-            "panel_url": panel_data.get("panel_url", ""),
-            "external_details_url": panel_data.get("external_details_url", ""),
-            "_raw": panel_data  # Keep for debugging
-        }
-
-    except Exception as e:
-        st.sidebar.error(f"Error fetching CSPC_Panels data for panel {panel_code}: {e}")
-        return {}
-
-
-# ========================
-# DYNAMIC FILTERS FROM DATA
-# ========================
-@st.cache_data(ttl=3600, show_spinner=False)
-def get_all_themes(_client) -> list:
-    """Fetch all unique themes from CSPC_Panels collection"""
-    try:
-        panels_coll = _client.collections.get("CSPC_Panels")
-        response = panels_coll.query.fetch_objects(limit=1000)
-
-        themes = set()
-        for obj in response.objects:
-            theme = obj.properties.get("theme")
-            if theme:
-                themes.add(theme)
-
-        return sorted(list(themes))
-    except Exception as e:
-        st.sidebar.warning(f"Could not fetch themes: {e}")
-        return []
-
-
-@st.cache_data(ttl=3600, show_spinner=False)
-def get_all_panels(_client) -> list:
-    """Fetch all unique panel codes from CSPC_Panels collection"""
-    try:
-        panels_coll = _client.collections.get("CSPC_Panels")
-        response = panels_coll.query.fetch_objects(limit=1000)
-
-        panels = []
-        for obj in response.objects:
-            panel_code = obj.properties.get("panel_code")
-            title = obj.properties.get("title", "")
-            if panel_code:
-                # Format: "Panel 333 - Title"
-                display = f"Panel {panel_code}"
-                if title:
-                    display += f" - {title[:50]}..." if len(title) > 50 else f" - {title}"
-                panels.append((str(panel_code), display))
-
-        # Sort by panel code (numerically)
-        panels.sort(key=lambda x: int(x[0]) if x[0].isdigit() else 999999)
-
-        return panels
-    except Exception as e:
-        st.sidebar.warning(f"Could not fetch panels: {e}")
-        return []
-
-
-# ========================
-# AUDIO HELPERS
-# ========================
-def find_audio_file(name: str) -> Optional[str]:
-    if not name:
-        return None
-    base = name
-    for suf in ["_transcript.txt", ".txt", "_transcript"]:
-        base = base.removesuffix(suf)
-    for ext in [".mp3", ".MP3", ".wav", ".WAV"]:
-        path = os.path.join(AUDIO_DIR, base + ext)
-        if os.path.exists(path):
-            return path
-    return None
-
-
-def time_to_seconds(time_str):
-    """Convert HH:MM:SS or MM:SS to seconds."""
-    if not time_str or time_str == "—":
-        return 0
-    try:
-        parts = time_str.split(":")
-        if len(parts) == 3:  # HH:MM:SS
-            return int(parts[0]) * 3600 + int(parts[1]) * 60 + int(parts[2])
-        elif len(parts) == 2:  # MM:SS
-            return int(parts[0]) * 60 + int(parts[1])
-        else:
-            return 0
-    except (ValueError, AttributeError):
-        return 0
-
-
 def main():
-    # ========== CUSTOM CSS ==========
+    # ========== CUSTOM CSS (FIXED - Removed empty box) ==========
     st.markdown("""
     <style>
         .main > div {padding-top:0!important;}
@@ -222,6 +26,15 @@ def main():
             padding: 0.75rem 0.9rem;
             margin-bottom: 1.1rem;
             background-color: #fdfdfd;
+        }
+
+        /* Remove any extra spacing from streamlit elements inside chunk */
+        .chunk-root > .element-container {
+            margin-bottom: 0 !important;
+        }
+
+        .chunk-root > .element-container:first-child {
+            margin-top: 0 !important;
         }
 
         .results-header {
@@ -638,85 +451,85 @@ def main():
                             target_col = chunk_col1 if idx_chunk % 2 == 0 else chunk_col2
 
                             with target_col:
-                                st.markdown('<div class="chunk-root">', unsafe_allow_html=True)
-                                st.markdown(f"**Rank #{rank}**")
-                                st.write(chunk_props.get("text", ""))
+                                # Use container without explicit div to avoid empty box
+                                with st.container():
+                                    st.markdown('<div class="chunk-root">', unsafe_allow_html=True)
 
-                                raw_time = chunk_props.get("chunk_start_time")
-                                time_str = raw_time if raw_time and raw_time != "—" else "00:00:00"
-                                speakers_str = chunk_props.get("chunk_speakers") or "—"
+                                    st.markdown(f"**Rank #{rank}**")
+                                    st.write(chunk_props.get("text", ""))
 
-                                if speakers_str != "—":
-                                    st.caption(f"Time: {time_str}")
-                                    st.caption(f"Speakers: {speakers_str}")
-                                else:
-                                    st.caption(f"Time: {time_str}")
+                                    raw_time = chunk_props.get("chunk_start_time")
+                                    time_str = raw_time if raw_time and raw_time != "—" else "00:00:00"
+                                    speakers_str = chunk_props.get("chunk_speakers") or "—"
 
-                                # ========== FIXED AUDIO URL GENERATION ==========
-                                file_name = chunk_props.get("file_name")
+                                    if speakers_str != "—":
+                                        st.caption(f"Time: {time_str}")
+                                        st.caption(f"Speakers: {speakers_str}")
+                                    else:
+                                        st.caption(f"Time: {time_str}")
 
-                                if show_audio_debug:
-                                    st.markdown('<div class="debug-box debug-info">', unsafe_allow_html=True)
-                                    st.markdown("**🔊 AUDIO DEBUG INFO**")
-                                    st.code(f"file_name from DB: {file_name}")
-                                    st.code(f"panel_code: {panel_code}")
-                                    st.code(f"time: {time_str} ({time_to_seconds(time_str)}s)")
-
-                                if file_name:
-                                    # CRITICAL FIX: Remove _transcript.txt suffix properly
-                                    # file_name is like: "11-15-2023-CSPC- 102 - Dual-Use Research of Concern- Research Security for National Security_transcript.txt"
-                                    # We want: "11-15-2023-CSPC- 102 - Dual-Use Research of Concern- Research Security for National Security.mp3"
-
-                                    audio_filename = file_name
-
-                                    # Remove _transcript.txt suffix
-                                    if audio_filename.endswith("_transcript.txt"):
-                                        audio_filename = audio_filename[:-len("_transcript.txt")]
-                                    # Remove .txt suffix
-                                    elif audio_filename.endswith(".txt"):
-                                        audio_filename = audio_filename[:-len(".txt")]
-
-                                    # Remove _transcript suffix (if any)
-                                    if audio_filename.endswith("_transcript"):
-                                        audio_filename = audio_filename[:-len("_transcript")]
-
-                                    # Add .mp3 extension
-                                    audio_filename = audio_filename + ".mp3"
-
-                                    # Build S3 URL with proper encoding
-                                    audio_url = f"https://cspc-rag.s3.ca-central-1.amazonaws.com/audio/{quote(audio_filename)}"
+                                    # ========== FIXED AUDIO URL GENERATION ==========
+                                    file_name = chunk_props.get("file_name")
 
                                     if show_audio_debug:
-                                        st.code(f"Original file_name: {file_name}")
-                                        st.code(f"Cleaned audio filename: {audio_filename}")
-                                        st.code(f"Final S3 URL: {audio_url}")
+                                        st.markdown('<div class="debug-box debug-info">', unsafe_allow_html=True)
+                                        st.markdown("**🔊 AUDIO DEBUG INFO**")
+                                        st.code(f"file_name from DB: {file_name}")
+                                        st.code(f"panel_code: {panel_code}")
+                                        st.code(f"time: {time_str} ({time_to_seconds(time_str)}s)")
 
-                                    if test_s3_urls:
-                                        import requests
+                                    if file_name:
+                                        # CRITICAL FIX: Remove _transcript.txt suffix properly
+                                        audio_filename = file_name
+
+                                        # Remove _transcript.txt suffix
+                                        if audio_filename.endswith("_transcript.txt"):
+                                            audio_filename = audio_filename[:-len("_transcript.txt")]
+                                        # Remove .txt suffix
+                                        elif audio_filename.endswith(".txt"):
+                                            audio_filename = audio_filename[:-len(".txt")]
+
+                                        # Remove _transcript suffix (if any)
+                                        if audio_filename.endswith("_transcript"):
+                                            audio_filename = audio_filename[:-len("_transcript")]
+
+                                        # Add .mp3 extension
+                                        audio_filename = audio_filename + ".mp3"
+
+                                        # Build S3 URL with proper encoding
+                                        audio_url = f"https://cspc-rag.s3.ca-central-1.amazonaws.com/audio/{quote(audio_filename)}"
+
+                                        if show_audio_debug:
+                                            st.code(f"Original file_name: {file_name}")
+                                            st.code(f"Cleaned audio filename: {audio_filename}")
+                                            st.code(f"Final S3 URL: {audio_url}")
+
+                                        if test_s3_urls:
+                                            import requests
+                                            try:
+                                                headers = {'User-Agent': 'Mozilla/5.0', 'Range': 'bytes=0-1024'}
+                                                r = requests.get(audio_url, timeout=5, stream=True, headers=headers)
+                                                if r.status_code in [200, 206]:
+                                                    if show_audio_debug:
+                                                        st.markdown(f"✅ URL Test: {r.status_code} - ACCESSIBLE")
+                                                else:
+                                                    if show_audio_debug:
+                                                        st.markdown(f"❌ URL Test: {r.status_code}")
+                                            except Exception as e:
+                                                if show_audio_debug:
+                                                    st.markdown(f"❌ URL Test Error: {str(e)[:50]}")
+
+                                        if show_audio_debug:
+                                            st.markdown('</div>', unsafe_allow_html=True)
+
                                         try:
-                                            headers = {'User-Agent': 'Mozilla/5.0', 'Range': 'bytes=0-1024'}
-                                            r = requests.get(audio_url, timeout=5, stream=True, headers=headers)
-                                            if r.status_code in [200, 206]:
-                                                if show_audio_debug:
-                                                    st.markdown(f"✅ URL Test: {r.status_code} - ACCESSIBLE")
-                                            else:
-                                                if show_audio_debug:
-                                                    st.markdown(f"❌ URL Test: {r.status_code}")
+                                            st.audio(audio_url, start_time=time_to_seconds(time_str))
                                         except Exception as e:
-                                            if show_audio_debug:
-                                                st.markdown(f"❌ URL Test Error: {str(e)[:50]}")
+                                            st.error(f"Audio error: {e}")
+                                    else:
+                                        st.caption("⚠️ No file_name")
 
-                                    if show_audio_debug:
-                                        st.markdown('</div>', unsafe_allow_html=True)
-
-                                    try:
-                                        st.audio(audio_url, start_time=time_to_seconds(time_str))
-                                    except Exception as e:
-                                        st.error(f"Audio error: {e}")
-                                else:
-                                    st.caption("⚠️ No file_name")
-
-                                st.markdown("</div>", unsafe_allow_html=True)
+                                    st.markdown("</div>", unsafe_allow_html=True)
 
             except Exception as e:
                 st.error(f"Error: {e}")
