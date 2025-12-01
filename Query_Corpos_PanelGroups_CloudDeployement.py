@@ -16,8 +16,7 @@ from urllib.parse import quote
 S3_BUCKET = "cspc-rag"
 S3_REGION = "ca-central-1"
 S3_BASE_URL = f"https://{S3_BUCKET}.s3.{S3_REGION}.amazonaws.com"
-S3_AUDIO_PREFIX = "audio"   # folder in the bucket
-
+S3_AUDIO_PREFIX = "audio"  # folder in the bucket
 
 # ========================
 # CONFIG & PAGE SETUP
@@ -177,12 +176,6 @@ def find_audio_file(name: str) -> Optional[str]:
         if os.path.exists(path):
             return path
     return None
-
-
-
-
-# Import your helper functions (these should be at the top of your file)
-# from your_module import get_client, get_collection, get_all_themes, get_all_panels, get_panel_metadata_from_cspc_panels
 
 
 def time_to_seconds(time_str):
@@ -351,8 +344,8 @@ def main():
         st.markdown("---")
         st.subheader("Debug")
         debug_mode = st.checkbox("Enable Debug Mode", False, key="cfg_debug")
-        show_audio_debug = st.checkbox("Show Audio Debug Details", True, key="cfg_audio_debug")
-        test_s3_urls = st.checkbox("Test S3 URL Accessibility", True, key="cfg_test_urls")
+        show_audio_debug = st.checkbox("Show Audio Debug Details", False, key="cfg_audio_debug")
+        test_s3_urls = st.checkbox("Test S3 URL Accessibility", False, key="cfg_test_urls")
 
     # ========== MAIN QUESTION INPUT ==========
     _, col, _ = st.columns([0.1, 2.2, 0.1])
@@ -659,6 +652,7 @@ def main():
                                 else:
                                     st.caption(f"Time: {time_str}")
 
+                                # ========== FIXED AUDIO URL GENERATION ==========
                                 file_name = chunk_props.get("file_name")
 
                                 if show_audio_debug:
@@ -669,43 +663,54 @@ def main():
                                     st.code(f"time: {time_str} ({time_to_seconds(time_str)}s)")
 
                                 if file_name:
-                                    base_name = os.path.splitext(file_name)[0]
-                                    url_v1 = f"https://cspc-rag.s3.ca-central-1.amazonaws.com/audio/{quote(base_name + '.mp3')}"
-                                    url_v2 = f"https://cspc-rag.s3.ca-central-1.amazonaws.com/audio/Panel_{panel_code}.mp3"
-                                    url_v3 = f"https://cspc-rag.s3.ca-central-1.amazonaws.com/audio/{panel_code}.mp3"
+                                    # CRITICAL FIX: Remove _transcript.txt suffix properly
+                                    # file_name is like: "11-15-2023-CSPC- 102 - Dual-Use Research of Concern- Research Security for National Security_transcript.txt"
+                                    # We want: "11-15-2023-CSPC- 102 - Dual-Use Research of Concern- Research Security for National Security.mp3"
+
+                                    audio_filename = file_name
+
+                                    # Remove _transcript.txt suffix
+                                    if audio_filename.endswith("_transcript.txt"):
+                                        audio_filename = audio_filename[:-len("_transcript.txt")]
+                                    # Remove .txt suffix
+                                    elif audio_filename.endswith(".txt"):
+                                        audio_filename = audio_filename[:-len(".txt")]
+
+                                    # Remove _transcript suffix (if any)
+                                    if audio_filename.endswith("_transcript"):
+                                        audio_filename = audio_filename[:-len("_transcript")]
+
+                                    # Add .mp3 extension
+                                    audio_filename = audio_filename + ".mp3"
+
+                                    # Build S3 URL with proper encoding
+                                    audio_url = f"https://cspc-rag.s3.ca-central-1.amazonaws.com/audio/{quote(audio_filename)}"
 
                                     if show_audio_debug:
-                                        st.code(f"V1: {url_v1}")
-                                        st.code(f"V2: {url_v2}")
-                                        st.code(f"V3: {url_v3}")
-
-                                    working_url = None
+                                        st.code(f"Original file_name: {file_name}")
+                                        st.code(f"Cleaned audio filename: {audio_filename}")
+                                        st.code(f"Final S3 URL: {audio_url}")
 
                                     if test_s3_urls:
                                         import requests
-                                        for name, url in [("V1", url_v1), ("V2", url_v2), ("V3", url_v3)]:
-                                            try:
-                                                headers = {'User-Agent': 'Mozilla/5.0', 'Range': 'bytes=0-1024'}
-                                                r = requests.get(url, timeout=5, stream=True, headers=headers)
-                                                if r.status_code in [200, 206]:
-                                                    working_url = url
-                                                    if show_audio_debug:
-                                                        st.markdown(f"✅ {name}: {r.status_code}")
-                                                    break
-                                                elif show_audio_debug:
-                                                    st.markdown(f"❌ {name}: {r.status_code}")
-                                            except Exception as e:
+                                        try:
+                                            headers = {'User-Agent': 'Mozilla/5.0', 'Range': 'bytes=0-1024'}
+                                            r = requests.get(audio_url, timeout=5, stream=True, headers=headers)
+                                            if r.status_code in [200, 206]:
                                                 if show_audio_debug:
-                                                    st.markdown(f"❌ {name}: {str(e)[:50]}")
-
-                                    final_url = working_url or url_v2
+                                                    st.markdown(f"✅ URL Test: {r.status_code} - ACCESSIBLE")
+                                            else:
+                                                if show_audio_debug:
+                                                    st.markdown(f"❌ URL Test: {r.status_code}")
+                                        except Exception as e:
+                                            if show_audio_debug:
+                                                st.markdown(f"❌ URL Test Error: {str(e)[:50]}")
 
                                     if show_audio_debug:
-                                        st.code(f"Using: {final_url}")
                                         st.markdown('</div>', unsafe_allow_html=True)
 
                                     try:
-                                        st.audio(final_url, start_time=time_to_seconds(time_str))
+                                        st.audio(audio_url, start_time=time_to_seconds(time_str))
                                     except Exception as e:
                                         st.error(f"Audio error: {e}")
                                 else:
