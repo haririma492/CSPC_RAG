@@ -646,94 +646,62 @@ def main():
                             rank = item["rank"]
                             target_col = chunk_col1 if idx_chunk % 2 == 0 else chunk_col2
 
-                            with target_col:
-                                # Use a Streamlit container with custom styling via markdown
-                                st.markdown(f"""
-                                <div style="
-                                    border: 1px solid #ccc;
-                                    border-radius: 6px;
-                                    padding: 0.75rem 0.9rem;
-                                    margin-bottom: 1.1rem;
-                                    background-color: #fdfdfd;
-                                ">
-                                """, unsafe_allow_html=True)
+                            if file_name:
+                                audio_filename = file_name
 
-                                st.markdown(f"**Rank #{rank}**")
-                                st.write(chunk_props.get("text", ""))
+                                if audio_filename.endswith("_transcript.txt"):
+                                    audio_filename = audio_filename[:-len("_transcript.txt")]
+                                elif audio_filename.endswith(".txt"):
+                                    audio_filename = audio_filename[:-len(".txt")]
 
-                                raw_time = chunk_props.get("chunk_start_time")
-                                time_str = raw_time if raw_time and raw_time != "—" else "00:00:00"
-                                speakers_str = chunk_props.get("chunk_speakers") or "—"
+                                if audio_filename.endswith("_transcript"):
+                                    audio_filename = audio_filename[:-len("_transcript")]
 
-                                if speakers_str != "—":
-                                    st.caption(f"Time: {time_str}")
-                                    st.caption(f"Speakers: {speakers_str}")
-                                else:
-                                    st.caption(f"Time: {time_str}")
-
-                                # ========== FIXED AUDIO URL GENERATION ==========
-                                file_name = chunk_props.get("file_name")
+                                audio_filename = audio_filename + ".mp3"
+                                audio_url = f"https://cspc-rag.s3.ca-central-1.amazonaws.com/audio/{quote(audio_filename)}"
 
                                 if show_audio_debug:
-                                    st.markdown('<div class="debug-box debug-info">', unsafe_allow_html=True)
-                                    st.markdown("**🔊 AUDIO DEBUG INFO**")
-                                    st.code(f"file_name from DB: {file_name}")
-                                    st.code(f"panel_code: {panel_code}")
-                                    st.code(f"time: {time_str} ({time_to_seconds(time_str)}s)")
+                                    with st.expander("🔊 Audio Debug"):
+                                        st.code(f"file_name: {file_name}")
+                                        st.code(f"Final URL: {audio_url}")
+                                        st.code(f"Start time: {time_str} ({time_to_seconds(time_str)}s)")
 
-                                if file_name:
-                                    # CRITICAL FIX: Remove _transcript.txt suffix properly
-                                    audio_filename = file_name
+                                # Create unique ID for this audio player
+                                audio_id = f"audio_{rank}_{idx_chunk}"
+                                start_seconds = time_to_seconds(time_str)
 
-                                    # Remove _transcript.txt suffix
-                                    if audio_filename.endswith("_transcript.txt"):
-                                        audio_filename = audio_filename[:-len("_transcript.txt")]
-                                    # Remove .txt suffix
-                                    elif audio_filename.endswith(".txt"):
-                                        audio_filename = audio_filename[:-len(".txt")]
+                                # Custom HTML audio player with proper start time handling
+                                audio_html = f"""
+                                <audio id="{audio_id}" controls style="width: 100%; margin-top: 10px;">
+                                    <source src="{audio_url}" type="audio/mpeg">
+                                    Your browser does not support the audio element.
+                                </audio>
+                                <script>
+                                    (function() {{
+                                        var audio = document.getElementById('{audio_id}');
+                                        if (audio) {{
+                                            // Set start time
+                                            audio.currentTime = {start_seconds};
 
-                                    # Remove _transcript suffix (if any)
-                                    if audio_filename.endswith("_transcript"):
-                                        audio_filename = audio_filename[:-len("_transcript")]
+                                            // Ensure it stays at start time when loaded
+                                            audio.addEventListener('loadedmetadata', function() {{
+                                                audio.currentTime = {start_seconds};
+                                            }});
 
-                                    # Add .mp3 extension
-                                    audio_filename = audio_filename + ".mp3"
+                                            // Set current time right before playing
+                                            audio.addEventListener('play', function() {{
+                                                if (audio.currentTime < {start_seconds}) {{
+                                                    audio.currentTime = {start_seconds};
+                                                }}
+                                            }}, {{ once: true }});
+                                        }}
+                                    }})();
+                                </script>
+                                """
 
-                                    # Build S3 URL with proper encoding
-                                    audio_url = f"https://cspc-rag.s3.ca-central-1.amazonaws.com/audio/{quote(audio_filename)}"
-
-                                    if show_audio_debug:
-                                        st.code(f"Original file_name: {file_name}")
-                                        st.code(f"Cleaned audio filename: {audio_filename}")
-                                        st.code(f"Final S3 URL: {audio_url}")
-
-                                    if test_s3_urls:
-                                        import requests
-                                        try:
-                                            headers = {'User-Agent': 'Mozilla/5.0', 'Range': 'bytes=0-1024'}
-                                            r = requests.get(audio_url, timeout=5, stream=True, headers=headers)
-                                            if r.status_code in [200, 206]:
-                                                if show_audio_debug:
-                                                    st.markdown(f"✅ URL Test: {r.status_code} - ACCESSIBLE")
-                                            else:
-                                                if show_audio_debug:
-                                                    st.markdown(f"❌ URL Test: {r.status_code}")
-                                        except Exception as e:
-                                            if show_audio_debug:
-                                                st.markdown(f"❌ URL Test Error: {str(e)[:50]}")
-
-                                    if show_audio_debug:
-                                        st.markdown('</div>', unsafe_allow_html=True)
-
-                                    try:
-                                        st.audio(audio_url, start_time=time_to_seconds(time_str))
-                                    except Exception as e:
-                                        st.error(f"Audio error: {e}")
-                                else:
-                                    st.caption("⚠️ No file_name")
-
-                                # Close the styling div
-                                st.markdown("</div>", unsafe_allow_html=True)
+                                st.markdown(audio_html, unsafe_allow_html=True)
+                            else:
+                                st.caption("⚠️ No file_name")
             except Exception as e:
                 st.error(f"Error: {e}")
                 if debug_mode:
