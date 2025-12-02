@@ -216,14 +216,6 @@ def main():
         button {font-size: 1.3rem !important;}
         audio {width: 100%;}
 
-        .chunk-root {
-            border: 1px solid #ccc;
-            border-radius: 6px;
-            padding: 0.75rem 0.9rem;
-            margin-bottom: 1.1rem;
-            background-color: #fdfdfd;
-        }
-
         .results-header {
             font-size: 2rem;
             font-weight: bold;
@@ -359,7 +351,7 @@ def main():
         )
 
         question = st.text_input(
-            "",
+            "Question",
             placeholder="e.g. What was said about AI and scientific discovery?",
             label_visibility="collapsed",
             key="main_question"
@@ -609,7 +601,7 @@ def main():
                             photo_url = panel_metadata.get("speaker_photo_url") or panel_metadata.get("photo_url")
                             if photo_url:
                                 try:
-                                    st.image(photo_url, use_column_width=True, caption=f"Panel {panel_code}")
+                                    st.image(photo_url, use_container_width=True, caption=f"Panel {panel_code}")
                                 except Exception:
                                     st.info("No photo available")
                             else:
@@ -638,7 +630,17 @@ def main():
                             target_col = chunk_col1 if idx_chunk % 2 == 0 else chunk_col2
 
                             with target_col:
-                                st.markdown('<div class="chunk-root">', unsafe_allow_html=True)
+                                # Bordered chunk container
+                                st.markdown(f"""
+                                <div style="
+                                    border: 1px solid #ccc;
+                                    border-radius: 6px;
+                                    padding: 0.75rem 0.9rem;
+                                    margin-bottom: 1.1rem;
+                                    background-color: #fdfdfd;
+                                ">
+                                """, unsafe_allow_html=True)
+
                                 st.markdown(f"**Rank #{rank}**")
                                 st.write(chunk_props.get("text", ""))
 
@@ -652,7 +654,7 @@ def main():
                                 else:
                                     st.caption(f"Time: {time_str}")
 
-                                # ========== FIXED AUDIO URL GENERATION ==========
+                                # ========== AUDIO URL GENERATION ==========
                                 file_name = chunk_props.get("file_name")
 
                                 if show_audio_debug:
@@ -663,33 +665,28 @@ def main():
                                     st.code(f"time: {time_str} ({time_to_seconds(time_str)}s)")
 
                                 if file_name:
-                                    # CRITICAL FIX: Remove _transcript.txt suffix properly
-                                    # file_name is like: "11-15-2023-CSPC- 102 - Dual-Use Research of Concern- Research Security for National Security_transcript.txt"
-                                    # We want: "11-15-2023-CSPC- 102 - Dual-Use Research of Concern- Research Security for National Security.mp3"
-
+                                    # Remove _transcript.txt suffix properly
                                     audio_filename = file_name
 
-                                    # Remove _transcript.txt suffix
                                     if audio_filename.endswith("_transcript.txt"):
                                         audio_filename = audio_filename[:-len("_transcript.txt")]
-                                    # Remove .txt suffix
                                     elif audio_filename.endswith(".txt"):
                                         audio_filename = audio_filename[:-len(".txt")]
 
-                                    # Remove _transcript suffix (if any)
                                     if audio_filename.endswith("_transcript"):
                                         audio_filename = audio_filename[:-len("_transcript")]
 
-                                    # Add .mp3 extension
                                     audio_filename = audio_filename + ".mp3"
 
-                                    # Build S3 URL with proper encoding
+                                    # Build S3 URL
+                                    start_seconds = time_to_seconds(time_str)
                                     audio_url = f"https://cspc-rag.s3.ca-central-1.amazonaws.com/audio/{quote(audio_filename)}"
 
                                     if show_audio_debug:
                                         st.code(f"Original file_name: {file_name}")
                                         st.code(f"Cleaned audio filename: {audio_filename}")
                                         st.code(f"Final S3 URL: {audio_url}")
+                                        st.code(f"Start seconds: {start_seconds}")
 
                                     if test_s3_urls:
                                         import requests
@@ -698,24 +695,72 @@ def main():
                                             r = requests.get(audio_url, timeout=5, stream=True, headers=headers)
                                             if r.status_code in [200, 206]:
                                                 if show_audio_debug:
-                                                    st.markdown(f"✅ URL Test: {r.status_code} - ACCESSIBLE")
+                                                    st.success(f"✅ URL Test: {r.status_code} - ACCESSIBLE")
                                             else:
                                                 if show_audio_debug:
-                                                    st.markdown(f"❌ URL Test: {r.status_code}")
+                                                    st.error(f"❌ URL Test: {r.status_code}")
                                         except Exception as e:
                                             if show_audio_debug:
-                                                st.markdown(f"❌ URL Test Error: {str(e)[:50]}")
+                                                st.error(f"❌ URL Test Error: {str(e)[:50]}")
 
                                     if show_audio_debug:
                                         st.markdown('</div>', unsafe_allow_html=True)
 
-                                    try:
-                                        st.audio(audio_url, start_time=time_to_seconds(time_str))
-                                    except Exception as e:
-                                        st.error(f"Audio error: {e}")
-                                else:
-                                    st.caption("⚠️ No file_name")
+                                    # Create unique ID for this audio player
+                                    audio_id = f"audio_player_{panel_code}_{rank}_{idx_chunk}"
 
+                                    # Custom HTML audio player that maintains start position
+                                    audio_html = f"""
+                                    <div style="margin: 10px 0;">
+                                        <audio id="{audio_id}" controls preload="metadata" style="width: 100%;">
+                                            <source src="{audio_url}" type="audio/mpeg">
+                                            Your browser does not support the audio element.
+                                        </audio>
+                                    </div>
+                                    <script>
+                                        (function() {{
+                                            const audio = document.getElementById('{audio_id}');
+                                            const startTime = {start_seconds};
+
+                                            if (!audio) return;
+
+                                            // Function to set the start time
+                                            function setStartTime() {{
+                                                if (audio.readyState >= 2) {{
+                                                    audio.currentTime = startTime;
+                                                }}
+                                            }}
+
+                                            // Set on loadedmetadata
+                                            audio.addEventListener('loadedmetadata', function() {{
+                                                audio.currentTime = startTime;
+                                            }});
+
+                                            // Set on canplay
+                                            audio.addEventListener('canplay', function() {{
+                                                if (audio.currentTime < startTime) {{
+                                                    audio.currentTime = startTime;
+                                                }}
+                                            }});
+
+                                            // Maintain start position on first play
+                                            let hasStarted = false;
+                                            audio.addEventListener('play', function() {{
+                                                if (!hasStarted) {{
+                                                    audio.currentTime = startTime;
+                                                    hasStarted = true;
+                                                }}
+                                            }});
+                                        }})();
+                                    </script>
+                                    """
+
+                                    st.markdown(audio_html, unsafe_allow_html=True)
+
+                                else:
+                                    st.caption("⚠️ No file_name in database")
+
+                                # Close the chunk div
                                 st.markdown("</div>", unsafe_allow_html=True)
 
             except Exception as e:
