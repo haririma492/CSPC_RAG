@@ -55,11 +55,16 @@ def apply_restrictions():
 
 def show_user_guide():
     """Display User Guide - ✅ FIX 1: Smaller button, ✅ FIX 2: No extra text, ✅ FIX 3: HTML renders properly"""
-    # Make the User Guide button MUCH smaller
+    # Make the User Guide button VERY small and position at top left
     st.markdown("""
     <style>
     div[data-testid="stExpander"] details summary p {
-        font-size: 0.7rem !important;
+        font-size: 0.65rem !important;
+    }
+    /* Position at top left */
+    .element-container:has(> div[data-testid="stExpander"]) {
+        position: relative;
+        margin-bottom: 0.5rem;
     }
     </style>
     """, unsafe_allow_html=True)
@@ -386,6 +391,9 @@ def main():
     </style>
     """, unsafe_allow_html=True)
 
+    # ========== USER GUIDE (Very Top Left) ==========
+    show_user_guide()
+
     # ========== HEADER ==========
     col1, col2 = st.columns([1.3, 4])
     with col1:
@@ -417,11 +425,6 @@ def main():
     st.markdown(
         '<div class="banner" style="background:#c41e3a; font-size:1.6rem;"> </div>',
         unsafe_allow_html=True)
-
-    # ========== USER GUIDE (Top Left) ==========
-    show_user_guide()
-
-    st.markdown("---")
 
     # ========== SIDEBAR ==========
     with st.sidebar:
