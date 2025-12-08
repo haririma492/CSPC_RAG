@@ -242,16 +242,7 @@ def main():
           }
           #MainMenu, footer {visibility: hidden;}
       </style>
-          .banner {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        text-align: center;
-        padding: 12px;
-        color: #ffffff;
-        font-weight: 700;
-        margin: 5px 0;
-    }
+
       """, unsafe_allow_html=True)
 
     # ========== SIDEBAR: ABOUT + USER GUIDE (RENDERED VIA HTML COMPONENT) ==========
