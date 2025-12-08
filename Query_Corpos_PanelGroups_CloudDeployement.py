@@ -648,91 +648,13 @@ def main():
     </style>
     """, unsafe_allow_html=True)
 
-    # ========== USER GUIDE (Very Top Left) ==========
-    # ========== CUSTOM CSS ==========
-    st.markdown("""
-      <style>
-          .main > div {padding-top:0!important;}
-          .block-container {padding-top:1rem!important; max-width:95%!important; font-size:1.1rem;}
-          #MainMenu, footer, header {visibility:hidden;}
-          .banner {text-align:center; padding:12px; color:white; font-weight:bold; margin:5px 0;}
-          .panel-header {background:#f0f2f6; padding:15px; border-radius:10px; margin:10px 0;}
-          .photo-container {border: 2px solid #ddd; border-radius: 8px; padding: 5px;}
-
-          p, li, span, label {font-size: 1.3rem !important;}
-
-          .panel-metadata {font-size: 1.9rem !important; line-height: 2.4;}
-          .panel-number {font-size: 1.8rem !important; font-weight: bold; margin-bottom: 0.5rem !important; color: #00426a;}
-          .panel-title {font-size: 2.4rem !important; font-weight: bold; line-height: 1.3; margin-bottom: 1.5rem !important;}
-          .chunks-header {font-size: 1.6rem !important; font-weight: bold !important; margin: 1.5rem 0 1rem 0 !important;}
-          input[type="text"] {font-size: 1.5rem !important; padding: 1rem !important;}
-          .stCaption, [data-testid="stCaptionContainer"] {font-size: 1.1rem !important;}
-          button {font-size: 1.3rem !important;}
-          audio {width: 100%;}
-
-          .chunk-root {
-              border: 1px solid #ccc;
-              border-radius: 6px;
-              padding: 0.75rem 0.9rem;
-              margin-bottom: 1.1rem;
-              background-color: #fdfdfd;
-          }
-
-          .results-header {
-              font-size: 2rem;
-              font-weight: bold;
-              margin: 1.5rem 0 1rem 0;
-              color: #00426a;
-          }
-
-          .panel-separator {
-              border: none;
-              border-top: 2px solid #ccc;
-              margin: 2rem 0;
-          }
-
-          .debug-box {
-              background-color: #fff3cd;
-              border: 2px solid #ffc107;
-              border-radius: 8px;
-              padding: 15px;
-              margin: 10px 0;
-              font-family: monospace;
-              font-size: 0.9rem;
-          }
-
-          .debug-success {
-              background-color: #d4edda;
-              border-color: #28a745;
-              color: #155724;
-          }
-
-          .debug-error {
-              background-color: #f8d7da;
-              border-color: #dc3545;
-              color: #721c24;
-          }
-
-          .debug-info {
-              background-color: #d1ecf1;
-              border-color: #17a2b8;
-              color: #0c5460;
-          }
-
-          .debug-warning {
-              background-color: #fff3cd;
-              border-color: #ffc107;
-              color: #856404;
-          }
-      </style>
-      """, unsafe_allow_html=True)
+    # LEFT: About panel
+    with st.sidebar:
+        render_about_in_sidebar()
 
     # ========== LAYOUT: LEFT PANEL + RIGHT MAIN ==========
     left_col, right_col = st.columns([1.0, 4.0])
 
-    # LEFT: About panel
-    with st.sidebar:
-        render_about_in_sidebar()
 
     # RIGHT: everything else that was previously in main()
     with right_col:
