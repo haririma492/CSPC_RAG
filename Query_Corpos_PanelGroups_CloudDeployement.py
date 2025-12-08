@@ -607,7 +607,7 @@ def main():
                     st.markdown(
                         f"""
                         <div style="
-                            font-size: 2.4rem;
+                            font-size: 2rem;
                             font-weight: 800;
                             text-align: center;
                             margin: 2rem 0 1.5rem 0;
@@ -618,7 +618,7 @@ def main():
                         """,
                         unsafe_allow_html=True
                     )
-
+                    st.write("")
                     panel_order = []
                     for panel_code, items in panels_dict.items():
                         best_rank = min(item["rank"] for item in items)
