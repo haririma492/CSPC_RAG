@@ -643,8 +643,8 @@ def main():
                                 st.markdown(
                                     f"""
                                     <div style="
-                                        font-size: 2rem;
-                                        font-weight: 900;
+                                        font-size: 1.8rem;
+                                        font-weight: 700;
                                         color: #002a5c;
                                         line-height: 1.2;
                                         margin-bottom: 1.5rem;
