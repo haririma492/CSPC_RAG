@@ -232,14 +232,18 @@ def time_to_seconds(time_str):
 
 
 def main():
-
-
-    # ========== SIDEBAR: User Guide + Long Text ==========
-
+    # ========== SIDEBAR: ABOUT + USER GUIDE (RENDERED VIA HTML COMPONENT) ==========
     with st.sidebar:
         with st.expander("📖 About CSPC AI Platform", expanded=False):
-            about_html = """
-    <div style="font-family: 'Segoe UI', sans-serif; font-size: 0.9rem; line-height: 1.5;">
+            components.html(
+                """
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+  </head>
+  <body style="margin:0; font-family: 'Segoe UI', sans-serif; font-size: 14px;">
+    <div style="font-size: 0.9rem; line-height: 1.5; padding-right: 4px;">
 
       <!-- USER GUIDE CARD -->
       <div style="background: white; padding: 14px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
@@ -296,25 +300,29 @@ def main():
 
       <h3 style="color:#333; margin-top:0;">Why CSPC Needs AI Platform</h3>
       <p>
-      The CSPC AI Platform represents a transformative approach to knowledge management and conference content accessibility.
-      Traditional conference proceedings often result in valuable insights becoming fragmented across hundreds of hours of recordings,
-      making it nearly impossible for executives and policy leaders to extract actionable intelligence efficiently.
-      This platform addresses that critical gap by transforming the entire CSPC 2023 conference archive into an instantly searchable,
-      AI-powered knowledge base where every discussion, recommendation, and insight becomes immediately accessible and actionable.
+        The CSPC AI Platform represents a transformative approach to knowledge management and conference content accessibility.
+        Traditional conference proceedings often result in valuable insights becoming fragmented across hundreds of hours of recordings,
+        making it nearly impossible for executives and policy leaders to extract actionable intelligence efficiently.
+        This platform addresses that critical gap by transforming the entire CSPC 2023 conference archive into an instantly searchable,
+        AI-powered knowledge base where every discussion, recommendation, and insight becomes immediately accessible and actionable.
       </p>
       <p>
-      For CSPC executives, this tool serves as a strategic asset for evidence-based decision-making and stakeholder engagement.
-      Whether preparing briefing materials, identifying expert speakers for future events, tracking thematic trends across panels,
-      or responding to policy inquiries with concrete examples from conference discussions, the platform enables instant access to relevant content
-      with precise timestamps and context. Critically, when selecting papers and topics for future conferences, the platform makes it effortless to
-      ensure thematic continuity while preventing unwanted repetition—allowing organizers to identify gaps, avoid redundancy, and build on previous
-      discussions rather than inadvertently rehashing them. This capability not only maximizes the return on investment from conference programming
-      but also positions CSPC as a leader in knowledge mobilization, demonstrating how AI can bridge the gap between scientific discourse and policy.
+        For CSPC executives, this tool serves as a strategic asset for evidence-based decision-making and stakeholder engagement.
+        Whether preparing briefing materials, identifying expert speakers for future events, tracking thematic trends across panels,
+        or responding to policy inquiries with concrete examples from conference discussions, the platform enables instant access to relevant content
+        with precise timestamps and context. Critically, when selecting papers and topics for future conferences, the platform makes it effortless to
+        ensure thematic continuity while preventing unwanted repetition—allowing organizers to identify gaps, avoid redundancy, and build on previous
+        discussions rather than inadvertently rehashing them. This capability not only maximizes the return on investment from conference programming
+        but also positions CSPC as a leader in knowledge mobilization, demonstrating how AI can bridge the gap between scientific discourse and policy.
       </p>
 
     </div>
-    """
-            st.markdown(about_html, unsafe_allow_html=True)
+  </body>
+</html>
+                """,
+                height=600,
+                scrolling=True,
+            )
 
     # ========== CONFIG (FROM ENV, NOT SIDEBAR) ==========
     weaviate_url = os.getenv(
