@@ -626,8 +626,21 @@ def main():
                         with title_col:
                             st.markdown(f'<div class="panel-number">Panel {panel_code}</div>', unsafe_allow_html=True)
                             if panel_metadata.get("title"):
-                                st.markdown(f'<div class="panel-title">{panel_metadata["title"]}</div>',
-                                            unsafe_allow_html=True)
+                                st.markdown(
+                                    f"""
+                                    <div style="
+                                        font-size: 3.2rem;
+                                        font-weight: 900;
+                                        color: #002a5c;
+                                        line-height: 1.2;
+                                        margin-bottom: 1.5rem;
+                                    ">
+                                        {panel_metadata["title"]}
+                                    </div>
+                                    """,
+                                    unsafe_allow_html=True
+                                )
+
                             st.markdown('<div class="panel-metadata">', unsafe_allow_html=True)
                             theme = panel_metadata.get("theme") or first_chunk.get("panel_theme", "N/A")
                             st.markdown(f"**Theme:** {theme}")
