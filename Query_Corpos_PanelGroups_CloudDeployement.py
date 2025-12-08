@@ -575,9 +575,20 @@ def main():
     # ========== CUSTOM CSS ==========
     st.markdown("""
     <style>
-        .main > div {padding-top:0!important;}
-        .block-container {padding-top:1rem!important; max-width:95%!important; font-size:1.1rem;}
-        #MainMenu, footer {visibility:hidden;}  /* keep header visible so sidebar toggle works */
+        /* Give the page some breathing room at the top */
+        .block-container {
+            padding-top: 2.5rem !important;   /* was 1rem */
+            max-width: 95% !important;
+            font-size: 1.1rem;
+        }
+
+        /* Don't kill all top padding on the main container */
+        .main > div {
+            padding-top: 0.5rem !important;   /* or just remove this rule entirely */
+        }
+
+        #MainMenu, footer {visibility:hidden;}  /* keep header visible so layout is correct */
+
         .banner {text-align:center; padding:12px; color:white; font-weight:bold; margin:5px 0;}
         .panel-header {background:#f0f2f6; padding:15px; border-radius:10px; margin:10px 0;}
         .photo-container {border: 2px solid #ddd; border-radius: 8px; padding: 5px;}
