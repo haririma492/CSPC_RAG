@@ -232,13 +232,7 @@ def main():
               border-top: 2px solid #ccc;
               margin: 2rem 0;
           }
-          .chunk-root {
-              border: 1px solid #ccc;
-              border-radius: 6px;
-              padding: 0.75rem 0.9rem;
-              margin-bottom: 1.1rem;
-              background-color: #fdfdfd;
-          }
+
       </style>
       """, unsafe_allow_html=True)
 
