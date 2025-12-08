@@ -16,7 +16,7 @@ import streamlit.components.v1 as components
 
 
 # ============================================================================
-# ADMIN CONFIGURATION
+# ADMIN CONFIGURATION - ✅ ALL 3 FIXES APPLIED!
 # ============================================================================
 
 ADMIN_EMAILS = ["yazdan_hariri@yahoo.com"]  # ⚠️ Your admin email
@@ -45,8 +45,9 @@ S3_BASE_URL = f"https://{S3_BUCKET}.s3.{S3_REGION}.amazonaws.com"
 S3_AUDIO_PREFIX = "audio"
 
 # ============================================================================
-# PAGE SETUP
+# ADMIN MODE & PAGE SETUP
 # ============================================================================
+
 
 st.set_page_config(
     page_title="CSPC 2023 AI Search.",
@@ -79,6 +80,13 @@ def get_panel_metadata_from_cspc_panels(client, panel_code: str) -> dict:
     """
     Fetch panel metadata including photo_url from CSPC_Panels collection.
     This is a SEPARATE collection from DocChunk.
+
+    Args:
+        client: Weaviate client
+        panel_code: Panel code (e.g., "333", "11", "101")
+
+    Returns:
+        dict with title, photo_url, speaker_photo_url, organized_by, speakers, etc.
     """
     if not panel_code:
         return {}
@@ -108,6 +116,7 @@ def get_panel_metadata_from_cspc_panels(client, panel_code: str) -> dict:
 
         panel_data = response.objects[0].properties
 
+        # Extract and clean data
         def _first_or_value(val):
             """Handle list fields - take first item if it's a list"""
             if isinstance(val, list):
@@ -123,9 +132,10 @@ def get_panel_metadata_from_cspc_panels(client, panel_code: str) -> dict:
             "organized_by": panel_data.get("organized_by") or panel_data.get("panel_organized_by", ""),
             "speakers": panel_data.get("speakers", []),
             "panel_date": panel_data.get("panel_date", ""),
+            "abstract": panel_data.get("abstract", ""),
             "panel_url": panel_data.get("panel_url", ""),
             "external_details_url": panel_data.get("external_details_url", ""),
-            "_raw": panel_data
+            "_raw": panel_data  # Keep for debugging
         }
 
     except Exception as e:
@@ -168,12 +178,15 @@ def get_all_panels(_client) -> list:
             panel_code = obj.properties.get("panel_code")
             title = obj.properties.get("title", "")
             if panel_code:
+                # Format: "Panel 333 - Title"
                 display = f"Panel {panel_code}"
                 if title:
                     display += f" - {title[:50]}..." if len(title) > 50 else f" - {title}"
                 panels.append((str(panel_code), display))
 
+        # Sort by panel code (numerically)
         panels.sort(key=lambda x: int(x[0]) if x[0].isdigit() else 999999)
+
         return panels
     except Exception as e:
         st.sidebar.warning(f"Could not fetch panels: {e}")
@@ -203,9 +216,9 @@ def time_to_seconds(time_str):
         return 0
     try:
         parts = time_str.split(":")
-        if len(parts) == 3:
+        if len(parts) == 3:  # HH:MM:SS
             return int(parts[0]) * 3600 + int(parts[1]) * 60 + int(parts[2])
-        elif len(parts) == 2:
+        elif len(parts) == 2:  # MM:SS
             return int(parts[0]) * 60 + int(parts[1])
         else:
             return 0
@@ -217,6 +230,7 @@ def time_to_seconds(time_str):
 # MAIN APPLICATION
 # ============================================================================
 
+
 def main():
     # ========== CUSTOM CSS ==========
     st.markdown("""
@@ -227,22 +241,11 @@ def main():
               font-size: 1.1rem;
           }
           #MainMenu, footer {visibility: hidden;}
-          .panel-separator {
-              border: none;
-              border-top: 2px solid #ccc;
-              margin: 2rem 0;
-          }
-          .chunk-root {
-              border: 1px solid #ccc;
-              border-radius: 6px;
-              padding: 0.75rem 0.9rem;
-              margin-bottom: 1.1rem;
-              background-color: #fdfdfd;
-          }
       </style>
+
       """, unsafe_allow_html=True)
 
-    # ========== SIDEBAR: ABOUT + USER GUIDE ==========
+    # ========== SIDEBAR: ABOUT + USER GUIDE (RENDERED VIA HTML COMPONENT) ==========
     with st.sidebar:
         with st.expander("📖 About CSPC AI Platform", expanded=False):
             components.html(
@@ -255,7 +258,9 @@ def main():
   <body style="margin:0; font-family: 'Segoe UI', sans-serif; font-size: 14px;">
     <div style="font-size: 0.9rem; line-height: 1.5; padding-right: 4px;">
 
+      <!-- USER GUIDE CARD -->
       <div style="background: white; padding: 14px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+
         <div style="text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
                     color: white; padding: 16px; border-radius: 10px; margin: -14px -14px 14px -14px;">
           <h2 style="margin: 0; font-size: 1.4em;">CSPC AI PLATFORM</h2>
@@ -275,6 +280,7 @@ def main():
           </ul>
         </div>
 
+        <!-- DO / DON'T BOXES -->
         <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0;">
           <div style="background: #e8f5e9; padding: 10px; border-radius: 8px; border: 2px solid #4caf50;">
             <h4 style="color: #2e7d32; margin-top: 0; font-size: 0.95em;">✓ DO</h4>
@@ -302,6 +308,7 @@ def main():
         </div>
       </div>
 
+      <!-- LONG TEXT AFTER USER GUIDE -->
       <hr style="margin: 18px 0; border: none; border-top: 1px solid #ddd;" />
 
       <h3 style="color:#333; margin-top:0;">Why CSPC Needs AI Platform</h3>
@@ -343,6 +350,7 @@ def main():
     alpha = 0.75
     top_k = 10
     use_reranker = True
+    use_llm = True
     debug_mode = False
     show_audio_debug = False
     test_s3_urls = False
@@ -372,7 +380,7 @@ def main():
             unsafe_allow_html=True
         )
 
-    # Blue banner
+    # Blue banner – centered, white text
     st.markdown(
         """
         <div style="
@@ -390,7 +398,7 @@ def main():
         unsafe_allow_html=True,
     )
 
-    # Red banner – Powered by olgoo.com
+    # Red banner – smaller, dimmer text, right-justified, link without underline
     st.markdown(
         """
         <div style="
@@ -594,6 +602,29 @@ def main():
 
                 objects = objects[:top_k]
 
+                if use_llm and objects:
+                    with st.spinner("Generating AI answer..."):
+                        context = "\n\n".join([
+                            f"[{i}] Panel {o.properties.get('panel_code', '?')} | "
+                            f"{o.properties.get('chunk_start_time', '')}\n"
+                            f"{o.properties.get('text', '')}"
+                            for i, o in enumerate(objects[:8], 1)
+                        ])
+                        resp = oai.chat.completions.create(
+                            model="gpt-4o-mini",
+                            messages=[
+                                {"role": "system",
+                                 "content": "Answer using only the provided context from CSPC 2023 conference panels."},
+                                {"role": "user", "content": f"Question: {question}\n\nContext:\n{context}\n\nAnswer:"}
+                            ],
+                            temperature=0.2
+                        )
+                        answer = resp.choices[0].message.content
+                        st.markdown('<h2 style="font-size:2.8rem; color:#00426a; margin-bottom:1rem;">AI Answer</h2>',
+                                    unsafe_allow_html=True)
+                        st.markdown(answer)
+                        st.markdown("---")
+
                 if not objects:
                     st.info("No results found.")
                 else:
@@ -622,7 +653,6 @@ def main():
                         unsafe_allow_html=True
                     )
                     st.write("")
-
                     panel_order = []
                     for panel_code, items in panels_dict.items():
                         best_rank = min(item["rank"] for item in items)
@@ -777,6 +807,11 @@ def main():
                 st.error(f"Error: {e}")
                 if debug_mode:
                     st.exception(e)
+
+    # ========== OPTIONAL STATUS IN SIDEBAR (REMOVE IF YOU WANT CLEANEST UI) ==========
+
+
+
 
 
 if __name__ == "__main__":
