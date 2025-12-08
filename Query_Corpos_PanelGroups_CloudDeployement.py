@@ -652,37 +652,6 @@ def main():
     with st.sidebar:
         render_about_in_sidebar()
 
-    # ========== LAYOUT: LEFT PANEL + RIGHT MAIN ==========
-    left_col, right_col = st.columns([1.0, 4.0])
-
-
-    # RIGHT: everything else that was previously in main()
-    with right_col:
-        # ========== HEADER ==========
-        col1, col2 = st.columns([1.3, 4])
-        with col1:
-            st.image("https://sciencepolicy.ca/wp-content/uploads/2020/09/cspc-logo.png", width=300)
-        with col2:
-            st.markdown(
-                """
-                <div style="
-                    display:flex;
-                    align-items:center;
-                    margin-left:15px;
-                    gap: 1.5rem;
-                    color:#00426a;
-                ">
-                    <div style="font-size:3rem; font-weight:bold; color:#00426a;">
-                        CSPC AI Platform
-                    </div>
-                    <div style="font-size:1.5rem; font-style:italic; color:#00426a;">
-                        .. where every moment is found & could be actionable
-                    </div>
-                </div>
-                """,
-                unsafe_allow_html=True
-            )
-
         st.markdown(
             '<div class="banner" style="background:#005a92; font-size:1.6rem;">Phase I • CSPC 2023 Conference</div>',
             unsafe_allow_html=True)
