@@ -35,25 +35,6 @@ def is_admin():
     return False
 
 
-def apply_restrictions():
-    """Hide sidebar and Streamlit UI elements for regular users"""
-    admin_mode = is_admin()
-    if not admin_mode:
-        st.markdown("""<style>
-            [data-testid="stSidebar"] { display: none; }
-            header { visibility: hidden; }
-            #MainMenu { visibility: hidden; }
-            footer { visibility: hidden; }
-            .block-container { padding-left: 1rem; padding-right: 1rem; max-width: 100%; }
-        </style>""", unsafe_allow_html=True)
-    else:
-        st.markdown("""<style>
-            [data-testid="stSidebar"] { border-left: 3px solid #FF4B4B; }
-        </style>""", unsafe_allow_html=True)
-        with st.sidebar:
-            st.success("🔧 Admin Mode")
-    return admin_mode
-
 
 def show_user_guide():
     """
@@ -218,7 +199,6 @@ S3_AUDIO_PREFIX = "audio"
 # ADMIN MODE & PAGE SETUP
 # ============================================================================
 
-admin_mode = apply_restrictions()
 
 st.set_page_config(
     page_title="CSPC 2023 AI Search.",
