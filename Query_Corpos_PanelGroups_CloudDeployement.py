@@ -605,7 +605,17 @@ def main():
                         panels_dict[str(panel_code)].append(item)
 
                     st.markdown(
-                        f'<div class="results-header">Top {len(objects)} Results from {len(panels_dict)} Different Panels</div>',
+                        f"""
+                        <div style="
+                            font-size: 2.4rem;
+                            font-weight: 800;
+                            text-align: center;
+                            margin: 2rem 0 1.5rem 0;
+                            color: #00426a;
+                        ">
+                            Top {len(objects)} Results from {len(panels_dict)} Different Panels
+                        </div>
+                        """,
                         unsafe_allow_html=True
                     )
 
