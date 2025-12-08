@@ -2,4 +2,5 @@
 openai
 weaviate-client
 sentence-transformers
-streamlit.components.v1 as components
+streamlit.components.v1
+
