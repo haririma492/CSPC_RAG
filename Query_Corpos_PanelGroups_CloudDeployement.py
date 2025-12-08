@@ -246,48 +246,86 @@ def main():
     """, unsafe_allow_html=True)
 
     # ========== SIDEBAR: User Guide + Long Text ==========
+    # ========== SIDEBAR: ABOUT + USER GUIDE ==========
     with st.sidebar:
-        # 1) Short “User Guide” label
-        st.markdown("### 📖 User Guide")
+        with st.expander("📖 About CSPC AI Platform", expanded=False):
+            about_html = """
+            <div style="font-family: 'Segoe UI', sans-serif; font-size: 0.9rem; line-height: 1.5;">
 
-        # 2) (Optional) a couple of bullets
-        st.markdown(
+              <!-- USER GUIDE CARD -->
+              <div style="background: white; padding: 14px; border-radius: 10px; box-shadow: 0 1px 3px rgba(0,0,0,0.04);">
+
+                <div style="text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                            color: white; padding: 16px; border-radius: 10px; margin: -14px -14px 14px -14px;">
+                  <h2 style="margin: 0; font-size: 1.4em;">CSPC AI PLATFORM</h2>
+                  <p style="margin: 6px 0 0 0; font-size: 0.9em;">User Guide</p>
+                </div>
+
+                <h3 style="color: #667eea; font-size: 1.05em; margin-top: 0;">Getting Started</h3>
+                <p><strong>What is this?</strong> An intelligent search system for exploring CSPC 2023 conference insights.</p>
+
+                <h3 style="color: #764ba2; font-size: 1.05em;">How to Use</h3>
+                <div style="background: #e8f5e9; padding: 10px; border-radius: 5px; margin: 8px 0;">
+                  <strong>Example questions:</strong>
+                  <ul style="margin: 6px 0 0 20px; padding-left: 0;">
+                    <li>"What was said about AI and scientific discovery?"</li>
+                    <li>"How did speakers address research security?"</li>
+                    <li>"What recommendations were made about science communication?"</li>
+                  </ul>
+                </div>
+
+                <!-- DO / DON'T BOXES -->
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0;">
+                  <div style="background: #e8f5e9; padding: 10px; border-radius: 8px; border: 2px solid #4caf50;">
+                    <h4 style="color: #2e7d32; margin-top: 0; font-size: 0.95em;">✓ DO</h4>
+                    <ul style="margin: 5px 0 0 20px;">
+                      <li>Use clear, specific questions</li>
+                      <li>Try different phrasings</li>
+                      <li>Use themes or panel filters to narrow results</li>
+                    </ul>
+                  </div>
+
+                  <div style="background: #ffebee; padding: 10px; border-radius: 8px; border: 2px solid #f44336;">
+                    <h4 style="color: #c62828; margin-top: 0; font-size: 0.95em;">✗ AVOID</h4>
+                    <ul style="margin: 5px 0 0 20px;">
+                      <li>Extremely vague queries</li>
+                      <li>Single-word searches</li>
+                      <li>Questions unrelated to CSPC 2023 content</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 10px; padding: 10px;
+                            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                            border-radius: 10px; color: white; font-size: 0.9em;">
+                  <em>Making every moment findable and every insight accessible.</em>
+                </div>
+              </div>
+
+              <!-- LONG TEXT AFTER USER GUIDE -->
+              <hr style="margin: 18px 0; border: none; border-top: 1px solid #ddd;" />
+
+              <h3 style="color:#333; margin-top:0;">Why CSPC Needs AI Platform</h3>
+              <p>
+              The CSPC AI Platform represents a transformative approach to knowledge management and conference content accessibility.
+              Traditional conference proceedings often result in valuable insights becoming fragmented across hundreds of hours of recordings,
+              making it nearly impossible for executives and policy leaders to extract actionable intelligence efficiently.
+              This platform addresses that critical gap by transforming the entire CSPC 2023 conference archive into an instantly searchable,
+              AI-powered knowledge base where every discussion, recommendation, and insight becomes immediately accessible and actionable.
+              </p>
+              <p>
+              For CSPC executives, this tool serves as a strategic asset for evidence-based decision-making and stakeholder engagement.
+              Whether preparing briefing materials, identifying expert speakers for future events, tracking thematic trends across panels,
+              or responding to policy inquiries with concrete examples from conference discussions, the platform enables instant access to relevant content
+              with precise timestamps and context. Critically, when selecting papers and topics for future conferences, the platform makes it effortless to
+              ensure thematic continuity while preventing unwanted repetition—allowing organizers to identify gaps, avoid redundancy, and build on previous
+              discussions rather than inadvertently rehashing them. This capability not only maximizes the return on investment from conference programming
+              but also positions CSPC as a leader in knowledge mobilization, demonstrating how AI can bridge the gap between scientific discourse and policy.
+              </p>
+
+            </div>
             """
-            - Ask questions about CSPC 2023 panels  
-            - Use the theme / panel filters to narrow results  
-            - Click audio snippets to jump to the right moment  
-            """
-        )
-
-        st.markdown("---")
-
-        # 3) Long text AFTER the user guide
-        st.markdown("### Why CSPC Needs AI Platform")
-
-        long_text_html = """
-        <p>
-        The CSPC AI Platform represents a transformative approach to knowledge management and conference content accessibility.
-        Traditional conference proceedings often result in valuable insights becoming fragmented across hundreds of hours of recordings,
-        making it nearly impossible for executives and policy leaders to extract actionable intelligence efficiently.
-        This platform addresses that critical gap by transforming the entire CSPC 2023 conference archive into an instantly searchable,
-        AI-powered knowledge base where every discussion, recommendation, and insight becomes immediately accessible and actionable.
-        </p>
-        <p>
-        For CSPC executives, this tool serves as a strategic asset for evidence-based decision-making and stakeholder engagement.
-        Whether preparing briefing materials, identifying expert speakers for future events, tracking thematic trends across panels,
-        or responding to policy inquiries with concrete examples from conference discussions, the platform enables instant access to relevant content
-        with precise timestamps and context. Critically, when selecting papers and topics for future conferences, the platform makes it effortless to
-        ensure thematic continuity while preventing unwanted repetition—allowing organizers to identify gaps, avoid redundancy, and build on previous
-        discussions rather than inadvertently rehashing them. This capability not only maximizes the return on investment from conference programming
-        but also positions CSPC as a leader in knowledge mobilization, demonstrating how AI can bridge the gap between scientific discourse and policy.
-        </p>
-        """
-        st.markdown(long_text_html, unsafe_allow_html=True)
-
-        # ========== REST OF YOUR APP (HEADER, QUESTION, SEARCH, RESULTS...) ==========
-        # your existing header / question / Weaviate / results code stays below, unchanged
-
-    # ========== SIDEBAR (END-USER: ONLY ABOUT) ==========
+            st.markdown(about_html, unsafe_allow_html=True)
 
 
     # ========== CONFIG (FROM ENV, NOT SIDEBAR) ==========
