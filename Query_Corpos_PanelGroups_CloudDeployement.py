@@ -104,7 +104,7 @@ def show_user_guide():
         st.markdown(USER_GUIDE_HTML, unsafe_allow_html=True)
 
 
-"""
+
 S3_BUCKET = "cspc-rag"
 S3_REGION = "ca-central-1"
 S3_BASE_URL = f"https://{S3_BUCKET}.s3.{S3_REGION}.amazonaws.com"
