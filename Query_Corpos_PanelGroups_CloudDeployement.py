@@ -54,22 +54,42 @@ def apply_restrictions():
 
 
 def show_user_guide():
-    """Display User Guide - ✅ FIX 1: Smaller button, ✅ FIX 2: No extra text, ✅ FIX 3: HTML renders properly"""
-    # Make the User Guide button VERY small and position at top left
+    """Display User Guide as a small 'key' on the top-left"""
+    # CSS to make the expander look like a small pill button
     st.markdown("""
     <style>
-    div[data-testid="stExpander"] details summary p {
-        font-size: 0.65rem !important;
+    /* Make the expander look like a small rounded "key" */
+    div[data-testid="stExpander"] > details {
+        border: 1px solid #ccc;
+        border-radius: 999px;
+        display: inline-block;
+        padding: 0;              /* remove default padding */
+        background: #f5f5f5;
     }
-    /* Position at top left */
-    .element-container:has(> div[data-testid="stExpander"]) {
-        position: relative;
-        margin-bottom: 0.5rem;
+
+    /* Summary part (the clickable header) */
+    div[data-testid="stExpander"] summary {
+        padding: 2px 10px;       /* small chip-like padding */
+        font-size: 0.8rem;       /* smaller text */
+        cursor: pointer;
+        list-style: none;        /* remove default disclosure triangle bullet */
+    }
+
+    /* Remove the default triangle marker in some browsers */
+    div[data-testid="stExpander"] summary::-webkit-details-marker {
+        display: none;
+    }
+
+    /* Content inside expander: normal card */
+    div[data-testid="stExpander"] div[role="group"] {
+        margin-top: 0.5rem;
+        border-radius: 8px;
+        background: white;
     }
     </style>
     """, unsafe_allow_html=True)
 
-    # User Guide HTML - formatted as single line to render properly (no indentation!)
+    # User Guide HTML - (unchanged)
     user_guide_html = """<div style="font-family: 'Segoe UI', sans-serif; padding: 20px; background: #f9f9f9; border-radius: 10px;">
 <div style="text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 10px; margin: -20px -20px 20px -20px;">
 <h1 style="margin: 0; font-size: 2.5em;">CSPC AI PLATFORM</h1>
@@ -111,10 +131,11 @@ def show_user_guide():
 </div>
 </div>"""
 
-    # ✅ FIX 2: Removed "- Click to view documentation" text
-    with st.expander("📖 User Guide", expanded=False):
-        st.markdown(user_guide_html, unsafe_allow_html=True)
-
+    # Put the expander in a **narrow left column** so it doesn't span full width
+    col_guide, _ = st.columns([0.2, 0.8])
+    with col_guide:
+        with st.expander("📖 User Guide", expanded=False):
+            st.markdown(user_guide_html, unsafe_allow_html=True)
 
 # ============================================================================
 # S3 CONFIGURATION
