@@ -399,14 +399,22 @@ def main():
     )
 
     # Red banner – visible strip under it (optional)
+    # Red banner – thicker, with "Powered by: olgoo.com" clickable
     st.markdown(
         """
         <div style="
             background:#c41e3a;
-            height:20px;
-            margin:0 0 10px 0;
+            font-size:1.3rem;
+            color:#ffffff;
+            text-align:center;
+            font-weight:600;
+            padding:10px 8px;
+            margin:0 0 16px 0;
         ">
-            &nbsp;
+            Powered by:
+            <a href="https://olgoo.com" target="_blank" style="color:#ffffff; text-decoration:underline;">
+                olgoo.com
+            </a>
         </div>
         """,
         unsafe_allow_html=True,
