@@ -607,7 +607,7 @@ def main():
                     st.markdown(
                         f"""
                         <div style="
-                            font-size: 2rem;
+                            font-size: 1.7rem;
                             font-weight: 800;
                             text-align: center;
                             margin: 2rem 0 1.5rem 0;
@@ -639,7 +639,7 @@ def main():
                                 st.markdown(
                                     f"""
                                     <div style="
-                                        font-size: 2.5rem;
+                                        font-size: 2.3rem;
                                         font-weight: 900;
                                         color: #002a5c;
                                         line-height: 1.2;
