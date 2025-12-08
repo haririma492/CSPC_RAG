@@ -520,6 +520,75 @@ def render_about_panel():
 # MAIN APPLICATION
 # ============================================================================
 
+def render_about_in_sidebar():
+    """Renders the 'About CSPC AI Platform' section in the sidebar (end-user only)."""
+    about_html = """<div style="font-family: 'Segoe UI', sans-serif; font-size: 0.9rem; line-height: 1.5;">
+<h2 style="color:#333; margin-top:0;">Why CSPC Needs AI Platform</h2>
+<p>
+The CSPC AI Platform represents a transformative approach to knowledge management and conference content accessibility.
+Traditional conference proceedings often result in valuable insights becoming fragmented across hundreds of hours of recordings,
+making it nearly impossible for executives and policy leaders to extract actionable intelligence efficiently.
+This platform addresses that critical gap by transforming the entire CSPC 2023 conference archive into an instantly searchable,
+AI-powered knowledge base where every discussion, recommendation, and insight becomes immediately accessible and actionable.
+</p>
+<p>
+For CSPC executives, this tool serves as a strategic asset for evidence-based decision-making and stakeholder engagement.
+Whether preparing briefing materials, identifying expert speakers for future events, tracking thematic trends across panels,
+or responding to policy inquiries with concrete examples from conference discussions, the platform enables instant access to relevant content
+with precise timestamps and context. Critically, when selecting papers and topics for future conferences, the platform makes it effortless to
+ensure thematic continuity while preventing unwanted repetition—allowing organizers to identify gaps, avoid redundancy, and build on previous
+discussions rather than inadvertently rehashing them. This capability not only maximizes the return on investment from conference programming
+but also positions CSPC as a leader in knowledge mobilization, demonstrating how AI can bridge the gap between scientific discourse and policy.
+</p>
+
+<div style="margin-top: 16px; background: white; padding: 14px; border-radius: 10px;">
+  <div style="text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 16px; border-radius: 10px; margin: -14px -14px 14px -14px;">
+    <h2 style="margin: 0; font-size: 1.4em;">CSPC AI PLATFORM</h2>
+    <p style="margin: 6px 0 0 0; font-size: 0.9em;">User Guide</p>
+  </div>
+
+  <h3 style="color: #667eea; font-size: 1.05em;">Getting Started</h3>
+  <p><strong>What is the CSPC AI Platform?</strong> An intelligent search system for exploring CSPC 2023 Conference insights.</p>
+
+  <h3 style="color: #764ba2; font-size: 1.05em;">How to Use</h3>
+  <div style="background: #e8f5e9; padding: 10px; border-radius: 5px; margin: 8px 0;">
+    <strong>Example Questions:</strong>
+    <ul style="margin: 5px 0 0 20px;">
+      <li>"What was said about AI and scientific discovery?"</li>
+      <li>"How did speakers address research security?"</li>
+      <li>"What recommendations were made about science communication?"</li>
+    </ul>
+  </div>
+
+  <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0;">
+    <div style="background: #e8f5e9; padding: 10px; border-radius: 8px; border: 2px solid #4caf50;">
+      <h4 style="color: #2e7d32; margin-top: 0; font-size: 0.95em;">✓ DO:</h4>
+      <ul style="margin: 5px 0 0 20px;">
+        <li>Use clear, specific questions</li>
+        <li>Try different phrasings</li>
+        <li>Use filters to narrow results</li>
+      </ul>
+    </div>
+    <div style="background: #ffebee; padding: 10px; border-radius: 8px; border: 2px solid #f44336;">
+      <h4 style="color: #c62828; margin-top: 0; font-size: 0.95em;">✗ AVOID:</h4>
+      <ul style="margin: 5px 0 0 20px;">
+        <li>Extremely vague queries</li>
+        <li>Single-word searches</li>
+        <li>Content outside CSPC 2023</li>
+      </ul>
+    </div>
+  </div>
+
+  <div style="text-align: center; margin-top: 10px; padding: 10px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; color: white; font-size: 0.9em;">
+    <em>Making every moment findable and every insight accessible.</em>
+  </div>
+</div>
+</div>"""
+
+    with st.sidebar.expander("📖 About CSPC AI Platform", expanded=False):
+        st.markdown(about_html, unsafe_allow_html=True)
+
+
 def main():
     # ========== CUSTOM CSS ==========
     st.markdown("""
@@ -682,8 +751,8 @@ def main():
     left_col, right_col = st.columns([1.0, 4.0])
 
     # LEFT: About panel
-    with left_col:
-        render_about_panel()
+    with st.sidebar:
+        render_about_in_sidebar()
 
     # RIGHT: everything else that was previously in main()
     with right_col:
