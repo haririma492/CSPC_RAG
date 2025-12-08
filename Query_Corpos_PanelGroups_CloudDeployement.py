@@ -399,17 +399,18 @@ def main():
     )
 
     # Red banner – visible strip under it (optional)
-    # Red banner – thicker, with "Powered by: olgoo.com" clickable
+    # Red banner – thinner, exotic font, right-justified
     st.markdown(
         """
         <div style="
             background:#c41e3a;
-            font-size:1.3rem;
+            font-size:1.2rem;
             color:#ffffff;
-            text-align:center;
+            text-align:right;
             font-weight:600;
-            padding:10px 8px;
-            margin:0 0 16px 0;
+            padding:6px 14px;
+            margin:0 0 12px 0;
+            font-family: 'Gill Sans', 'Trebuchet MS', 'Segoe UI', sans-serif;
         ">
             Powered by:
             <a href="https://olgoo.com" target="_blank" style="color:#ffffff; text-decoration:underline;">
