@@ -233,57 +233,56 @@ def time_to_seconds(time_str):
 
 def main():
     # ========== CUSTOM CSS ==========
-    def main():
-        # ========== CUSTOM CSS ==========
-        st.markdown("""
-        <style>
-            .block-container {
-                padding-top: 2rem !important;
-                max-width: 95% !important;
-                font-size: 1.1rem;
-            }
-            #MainMenu, footer {visibility: hidden;}
-        </style>
-        """, unsafe_allow_html=True)
+    # ========== CUSTOM CSS ==========
+    st.markdown("""
+    <style>
+        .block-container {
+            padding-top: 2rem !important;
+            max-width: 95% !important;
+            font-size: 1.1rem;
+        }
+        #MainMenu, footer {visibility: hidden;}
+    </style>
+    """, unsafe_allow_html=True)
 
-        # ========== SIDEBAR: User Guide + Long Text ==========
-        with st.sidebar:
-            # 1) Short “User Guide” label
-            st.markdown("### 📖 User Guide")
+    # ========== SIDEBAR: User Guide + Long Text ==========
+    with st.sidebar:
+        # 1) Short “User Guide” label
+        st.markdown("### 📖 User Guide")
 
-            # 2) (Optional) a couple of bullets
-            st.markdown(
-                """
-                - Ask questions about CSPC 2023 panels  
-                - Use the theme / panel filters to narrow results  
-                - Click audio snippets to jump to the right moment  
-                """
-            )
-
-            st.markdown("---")
-
-            # 3) Long text AFTER the user guide
-            st.markdown("### Why CSPC Needs AI Platform")
-
-            long_text_html = """
-            <p>
-            The CSPC AI Platform represents a transformative approach to knowledge management and conference content accessibility.
-            Traditional conference proceedings often result in valuable insights becoming fragmented across hundreds of hours of recordings,
-            making it nearly impossible for executives and policy leaders to extract actionable intelligence efficiently.
-            This platform addresses that critical gap by transforming the entire CSPC 2023 conference archive into an instantly searchable,
-            AI-powered knowledge base where every discussion, recommendation, and insight becomes immediately accessible and actionable.
-            </p>
-            <p>
-            For CSPC executives, this tool serves as a strategic asset for evidence-based decision-making and stakeholder engagement.
-            Whether preparing briefing materials, identifying expert speakers for future events, tracking thematic trends across panels,
-            or responding to policy inquiries with concrete examples from conference discussions, the platform enables instant access to relevant content
-            with precise timestamps and context. Critically, when selecting papers and topics for future conferences, the platform makes it effortless to
-            ensure thematic continuity while preventing unwanted repetition—allowing organizers to identify gaps, avoid redundancy, and build on previous
-            discussions rather than inadvertently rehashing them. This capability not only maximizes the return on investment from conference programming
-            but also positions CSPC as a leader in knowledge mobilization, demonstrating how AI can bridge the gap between scientific discourse and policy.
-            </p>
+        # 2) (Optional) a couple of bullets
+        st.markdown(
             """
-            st.markdown(long_text_html, unsafe_allow_html=True)
+            - Ask questions about CSPC 2023 panels  
+            - Use the theme / panel filters to narrow results  
+            - Click audio snippets to jump to the right moment  
+            """
+        )
+
+        st.markdown("---")
+
+        # 3) Long text AFTER the user guide
+        st.markdown("### Why CSPC Needs AI Platform")
+
+        long_text_html = """
+        <p>
+        The CSPC AI Platform represents a transformative approach to knowledge management and conference content accessibility.
+        Traditional conference proceedings often result in valuable insights becoming fragmented across hundreds of hours of recordings,
+        making it nearly impossible for executives and policy leaders to extract actionable intelligence efficiently.
+        This platform addresses that critical gap by transforming the entire CSPC 2023 conference archive into an instantly searchable,
+        AI-powered knowledge base where every discussion, recommendation, and insight becomes immediately accessible and actionable.
+        </p>
+        <p>
+        For CSPC executives, this tool serves as a strategic asset for evidence-based decision-making and stakeholder engagement.
+        Whether preparing briefing materials, identifying expert speakers for future events, tracking thematic trends across panels,
+        or responding to policy inquiries with concrete examples from conference discussions, the platform enables instant access to relevant content
+        with precise timestamps and context. Critically, when selecting papers and topics for future conferences, the platform makes it effortless to
+        ensure thematic continuity while preventing unwanted repetition—allowing organizers to identify gaps, avoid redundancy, and build on previous
+        discussions rather than inadvertently rehashing them. This capability not only maximizes the return on investment from conference programming
+        but also positions CSPC as a leader in knowledge mobilization, demonstrating how AI can bridge the gap between scientific discourse and policy.
+        </p>
+        """
+        st.markdown(long_text_html, unsafe_allow_html=True)
 
         # ========== REST OF YOUR APP (HEADER, QUESTION, SEARCH, RESULTS...) ==========
         # your existing header / question / Weaviate / results code stays below, unchanged
