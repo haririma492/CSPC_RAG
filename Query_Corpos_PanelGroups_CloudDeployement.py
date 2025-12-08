@@ -398,22 +398,21 @@ def main():
         unsafe_allow_html=True,
     )
 
-    # Red banner – visible strip under it (optional)
-    # Red banner – thinner, exotic font, right-justified
+    # Red banner – smaller, dimmer text, right-justified, link without underline
     st.markdown(
         """
         <div style="
             background:#c41e3a;
-            font-size:1.2rem;
-            color:#ffffff;
+            font-size:1.0rem;
+            color:#f0f0f0;
             text-align:right;
-            font-weight:600;
-            padding:6px 14px;
-            margin:0 0 12px 0;
+            font-weight:500;
+            padding:5px 14px;
+            margin:0 0 10px 0;
             font-family: 'Gill Sans', 'Trebuchet MS', 'Segoe UI', sans-serif;
         ">
             Powered by:
-            <a href="https://olgoo.com" target="_blank" style="color:#ffffff; text-decoration:underline;">
+            <a href="https://olgoo.com" target="_blank" style="color:#f0f0f0; text-decoration:none;">
                 olgoo.com
             </a>
         </div>
