@@ -422,29 +422,6 @@ def render_about_panel():
     # Small key-like title at top
     st.markdown('<div class="about-panel-title">ABOUT CSPC AI PLATFORM</div>', unsafe_allow_html=True)
 
-    # --- Why CSPC Needs AI Platform ---
-    st.markdown(
-        """
-        <h2>Why CSPC Needs AI Platform</h2>
-        <p>
-        The CSPC AI Platform represents a transformative approach to knowledge management and conference content accessibility.
-        Traditional conference proceedings often result in valuable insights becoming fragmented across hundreds of hours of recordings,
-        making it nearly impossible for executives and policy leaders to extract actionable intelligence efficiently.
-        This platform addresses that critical gap by transforming the entire CSPC 2023 conference archive into an instantly searchable,
-        AI-powered knowledge base where every discussion, recommendation, and insight becomes immediately accessible and actionable.
-        </p>
-        <p>
-        For CSPC executives, this tool serves as a strategic asset for evidence-based decision-making and stakeholder engagement.
-        Whether preparing briefing materials, identifying expert speakers for future events, tracking thematic trends across panels,
-        or responding to policy inquiries with concrete examples from conference discussions, the platform enables instant access to relevant content
-        with precise timestamps and context. Critically, when selecting papers and topics for future conferences, the platform makes it effortless to
-        ensure thematic continuity while preventing unwanted repetition—allowing organizers to identify gaps, avoid redundancy, and build on previous
-        discussions rather than inadvertently rehashing them. This capability not only maximizes the return on investment from conference programming
-        but also positions CSPC as a leader in knowledge mobilization, demonstrating how AI can bridge the gap between scientific discourse and policy.
-        </p>
-        """,
-        unsafe_allow_html=True,
-    )
 
     # --- Existing User Guide content ---
     st.markdown(
@@ -496,6 +473,29 @@ def render_about_panel():
     )
 
     st.markdown("</div>", unsafe_allow_html=True)
+    # --- Why CSPC Needs AI Platform ---
+    st.markdown(
+        """
+        <h2>Why CSPC Needs AI Platform</h2>
+        <p>
+        The CSPC AI Platform represents a transformative approach to knowledge management and conference content accessibility.
+        Traditional conference proceedings often result in valuable insights becoming fragmented across hundreds of hours of recordings,
+        making it nearly impossible for executives and policy leaders to extract actionable intelligence efficiently.
+        This platform addresses that critical gap by transforming the entire CSPC 2023 conference archive into an instantly searchable,
+        AI-powered knowledge base where every discussion, recommendation, and insight becomes immediately accessible and actionable.
+        </p>
+        <p>
+        For CSPC executives, this tool serves as a strategic asset for evidence-based decision-making and stakeholder engagement.
+        Whether preparing briefing materials, identifying expert speakers for future events, tracking thematic trends across panels,
+        or responding to policy inquiries with concrete examples from conference discussions, the platform enables instant access to relevant content
+        with precise timestamps and context. Critically, when selecting papers and topics for future conferences, the platform makes it effortless to
+        ensure thematic continuity while preventing unwanted repetition—allowing organizers to identify gaps, avoid redundancy, and build on previous
+        discussions rather than inadvertently rehashing them. This capability not only maximizes the return on investment from conference programming
+        but also positions CSPC as a leader in knowledge mobilization, demonstrating how AI can bridge the gap between scientific discourse and policy.
+        </p>
+        """,
+        unsafe_allow_html=True,
+    )
 
 
 # ============================================================================
@@ -685,7 +685,7 @@ def main():
                 gap: 1.5rem;
                 color:#00426a;
             ">
-                <div style="font-size:3rem; font-weight:bold; color:#00426a;">
+                <div style="font-size:2.8rem; font-weight:bold; color:#00426a;">
                     CSPC AI Platform
                 </div>
                 <div style="font-size:1.5rem; font-style:italic; color:#00426a;">
