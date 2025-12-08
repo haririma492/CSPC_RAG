@@ -418,6 +418,11 @@ def main():
         '<div class="banner" style="background:#c41e3a; font-size:1.6rem;"> </div>',
         unsafe_allow_html=True)
 
+    # ========== USER GUIDE (Top Left) ==========
+    show_user_guide()
+
+    st.markdown("---")
+
     # ========== SIDEBAR ==========
     with st.sidebar:
         st.header("Configuration")
@@ -480,10 +485,6 @@ def main():
 
     if "chat_history" not in st.session_state:
         st.session_state.chat_history = []
-
-    # ========== USER GUIDE BUTTON (placed here after question input) ==========
-    with col:
-        show_user_guide()
 
     # ========== CONNECT TO WEAVIATE ==========
     try:
