@@ -184,7 +184,7 @@ S3_AUDIO_PREFIX = "audio"
 admin_mode = apply_restrictions()
 
 st.set_page_config(
-    page_title="CSPC 2023 AI Search",
+    page_title="CSPC 2023 AI Search.",
     layout="wide",
     initial_sidebar_state="expanded"
 )
