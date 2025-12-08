@@ -12,7 +12,99 @@ from weaviate.classes.init import Auth
 from weaviate.classes.query import Filter, MetadataQuery
 from sentence_transformers import CrossEncoder
 from urllib.parse import quote
+import streamlit as st
+import os
 
+# ===== STEP 1: SET YOUR ADMIN EMAIL =====
+ADMIN_EMAILS = ["yazdan_hariri@yahoo.com"]  # ⚠️ CHANGE THIS!
+
+
+# ===== ADMIN DETECTION =====
+def is_admin():
+    try:
+        user_info = st.experimental_user
+        if hasattr(user_info, 'email') and user_info.email in ADMIN_EMAILS:
+            return True
+        if os.getenv("STREAMLIT_RUNTIME_ENV") != "cloud":
+            return True
+    except:
+        pass
+    return False
+
+
+# ===== HIDE UI FOR REGULAR USERS =====
+def apply_restrictions():
+    admin_mode = is_admin()
+    if not admin_mode:
+        st.markdown("""<style>
+            [data-testid="stSidebar"] { display: none; }
+            header { visibility: hidden; }
+            #MainMenu { visibility: hidden; }
+            footer { visibility: hidden; }
+            .block-container { padding-left: 1rem; padding-right: 1rem; max-width: 100%; }
+        </style>""", unsafe_allow_html=True)
+    else:
+        st.markdown("""<style>
+            [data-testid="stSidebar"] { border-left: 3px solid #FF4B4B; }
+        </style>""", unsafe_allow_html=True)
+        with st.sidebar:
+            st.success("🔧 Admin Mode")
+    return admin_mode
+
+
+# ===== USER GUIDE BUTTON =====
+def show_user_guide():
+    # Full HTML content at: user_guide_content.html (in outputs folder)
+    USER_GUIDE_HTML = """
+    <div style="font-family: 'Segoe UI', sans-serif; padding: 20px; background: #f9f9f9; border-radius: 10px;">
+        <div style="text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 30px; border-radius: 10px; margin: -20px -20px 20px -20px;">
+            <h1 style="margin: 0; font-size: 2.5em;">CSPC AI PLATFORM</h1>
+            <p style="margin: 10px 0 0 0; font-size: 1.2em;">User Guide</p>
+        </div>
+        <div style="background: white; padding: 30px; border-radius: 10px;">
+            <h2 style="color: #667eea;">Getting Started</h2>
+            <p><strong>What is the CSPC AI Platform?</strong> An intelligent search system for exploring CSPC 2023 Conference insights.</p>
+
+            <h3 style="color: #764ba2;">How to Use</h3>
+            <div style="background: #e8f5e9; padding: 15px; border-radius: 5px; margin: 10px 0;">
+                <strong>Example Questions:</strong>
+                <ul>
+                    <li>"What was said about AI and scientific discovery?"</li>
+                    <li>"How did speakers address research security?"</li>
+                    <li>"What recommendations were made about science communication?"</li>
+                </ul>
+            </div>
+
+            <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0;">
+                <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; border: 2px solid #4caf50;">
+                    <h4 style="color: #2e7d32; margin-top: 0;">✓ DO:</h4>
+                    <ul style="margin: 5px 0 0 20px;">
+                        <li>Use clear, specific questions</li>
+                        <li>Try different phrasings</li>
+                        <li>Use filters to narrow results</li>
+                    </ul>
+                </div>
+                <div style="background: #ffebee; padding: 15px; border-radius: 8px; border: 2px solid #f44336;">
+                    <h4 style="color: #c62828; margin-top: 0;">✗ AVOID:</h4>
+                    <ul style="margin: 5px 0 0 20px;">
+                        <li>Extremely vague queries</li>
+                        <li>Single-word searches</li>
+                        <li>Content outside CSPC 2023</li>
+                    </ul>
+                </div>
+            </div>
+
+            <div style="text-align: center; margin-top: 20px; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; color: white;">
+                <em>Making every moment findable and every insight accessible.</em>
+            </div>
+        </div>
+    </div>
+    """
+    with st.expander("📖 **User Guide** - Click to view documentation", expanded=False):
+        st.markdown(USER_GUIDE_HTML, unsafe_allow_html=True)
+
+
+"""
 S3_BUCKET = "cspc-rag"
 S3_REGION = "ca-central-1"
 S3_BASE_URL = f"https://{S3_BUCKET}.s3.{S3_REGION}.amazonaws.com"
@@ -21,6 +113,11 @@ S3_AUDIO_PREFIX = "audio"  # folder in the bucket
 # ========================
 # CONFIG & PAGE SETUP
 # ========================
+# Right after imports, BEFORE st.set_page_config():
+admin_mode = apply_restrictions()
+
+# Wherever you want the User Guide button:
+show_user_guide()
 st.set_page_config(
     page_title="CSPC 2023 AI Search",
     layout="wide",
