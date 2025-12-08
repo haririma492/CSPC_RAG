@@ -611,7 +611,7 @@ def main():
                         f"""
                         <div style="
                             font-size: 1.7rem;
-                            font-weight: 800;
+                            font-weight: 500;
                             text-align: center;
                             margin: 2rem 0 1.5rem 0;
                             color: #00426a;
