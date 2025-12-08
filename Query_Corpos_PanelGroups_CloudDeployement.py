@@ -232,18 +232,7 @@ def time_to_seconds(time_str):
 
 
 def main():
-    # ========== CUSTOM CSS ==========
-    # ========== CUSTOM CSS ==========
-    st.markdown("""
-    <style>
-        .block-container {
-            padding-top: 2rem !important;
-            max-width: 95% !important;
-            font-size: 1.1rem;
-        }
-        #MainMenu, footer {visibility: hidden;}
-    </style>
-    """, unsafe_allow_html=True)
+
 
     # ========== SIDEBAR: User Guide + Long Text ==========
 
