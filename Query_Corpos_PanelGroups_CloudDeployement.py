@@ -12,6 +12,8 @@ from weaviate.classes.init import Auth
 from weaviate.classes.query import Filter, MetadataQuery
 from sentence_transformers import CrossEncoder
 from urllib.parse import quote
+import streamlit.components.v1 as components
+
 
 # ============================================================================
 # ADMIN CONFIGURATION - ✅ ALL 3 FIXES APPLIED!
@@ -54,11 +56,13 @@ def apply_restrictions():
 
 
 def show_user_guide():
-    """Display a small 'About CSPC AI Platform' chip on the top-left with expandable content."""
-    # CSS: small pill-style toggle that does NOT span horizontally
-    st.markdown(
-        """
-        <style>
+    """Display a small 'About CSPC AI Platform' chip on the top-left with expandable content (using components.html)."""
+
+    # HTML + CSS together; rendered via components.html (no markdown escaping)
+    html = """
+    <html>
+    <head>
+      <style>
         .cspc-about-wrapper {
             display: inline-block;
             margin-bottom: 0.75rem;
@@ -89,16 +93,88 @@ def show_user_guide():
             padding: 20px;
             max-width: 900px;
         }
-        </style>
-        """,
-        unsafe_allow_html=True,
-    )
+      </style>
+    </head>
+    <body>
+      <div class="cspc-about-wrapper">
+        <details class="cspc-about-toggle">
+          <summary>📖 About CSPC AI Platform</summary>
+          <div class="cspc-about-content">
 
-    # IMPORTANT: single-line HTML so Streamlit doesn't treat it as code
-    user_guide_html = """<div class="cspc-about-wrapper"><details class="cspc-about-toggle"><summary>📖 About CSPC AI Platform</summary><div class="cspc-about-content"><h2 style="color:#333; margin-top:0;">Why CSPC Needs AI Platform</h2><p>The CSPC AI Platform represents a transformative approach to knowledge management and conference content accessibility. Traditional conference proceedings often result in valuable insights becoming fragmented across hundreds of hours of recordings, making it nearly impossible for executives and policy leaders to extract actionable intelligence efficiently. This platform addresses that critical gap by transforming the entire CSPC 2023 conference archive into an instantly searchable, AI-powered knowledge base where every discussion, recommendation, and insight becomes immediately accessible and actionable.</p><p>For CSPC executives, this tool serves as a strategic asset for evidence-based decision-making and stakeholder engagement. Whether preparing briefing materials, identifying expert speakers for future events, tracking thematic trends across panels, or responding to policy inquiries with concrete examples from conference discussions, the platform enables instant access to relevant content with precise timestamps and context. Critically, when selecting papers and topics for future conferences, the platform makes it effortless to ensure thematic continuity while preventing unwanted repetition—allowing organizers to identify gaps, avoid redundancy, and build on previous discussions rather than inadvertently rehashing them. This capability not only maximizes the return on investment from conference programming but also positions CSPC as a leader in knowledge mobilization, demonstrating how AI can bridge the gap between scientific discourse and policy.</p><div style="margin-top: 25px; background: white; padding: 20px; border-radius: 10px;"><div style="text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; border-radius: 10px; margin: -20px -20px 20px -20px;"><h1 style="margin: 0; font-size: 2.1em;">CSPC AI PLATFORM</h1><p style="margin: 10px 0 0 0; font-size: 1em;">User Guide</p></div><div><h2 style="color: #667eea;">Getting Started</h2><p><strong>What is the CSPC AI Platform?</strong> An intelligent search system for exploring CSPC 2023 Conference insights.</p><h3 style="color: #764ba2;">How to Use</h3><div style="background: #e8f5e9; padding: 15px; border-radius: 5px; margin: 10px 0;"><strong>Example Questions:</strong><ul><li>"What was said about AI and scientific discovery?"</li><li>"How did speakers address research security?"</li><li>"What recommendations were made about science communication?"</li></ul></div><div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0;"><div style="background: #e8f5e9; padding: 15px; border-radius: 8px; border: 2px solid #4caf50;"><h4 style="color: #2e7d32; margin-top: 0;">✓ DO:</h4><ul style="margin: 5px 0 0 20px;"><li>Use clear, specific questions</li><li>Try different phrasings</li><li>Use filters to narrow results</li></ul></div><div style="background: #ffebee; padding: 15px; border-radius: 8px; border: 2px solid #f44336;"><h4 style="color: #c62828; margin-top: 0;">✗ AVOID:</h4><ul style="margin: 5px 0 0 20px;"><li>Extremely vague queries</li><li>Single-word searches</li><li>Content outside CSPC 2023</li></ul></div></div><div style="text-align: center; margin-top: 20px; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; color: white;"><em>Making every moment findable and every insight accessible.</em></div></div></div></details></div>"""
+            <h2 style="color:#333; margin-top:0;">Why CSPC Needs AI Platform</h2>
+            <p>
+              The CSPC AI Platform represents a transformative approach to knowledge management and conference content accessibility.
+              Traditional conference proceedings often result in valuable insights becoming fragmented across hundreds of hours of recordings,
+              making it nearly impossible for executives and policy leaders to extract actionable intelligence efficiently.
+              This platform addresses that critical gap by transforming the entire CSPC 2023 conference archive into an instantly searchable,
+              AI-powered knowledge base where every discussion, recommendation, and insight becomes immediately accessible and actionable.
+            </p>
+            <p>
+              For CSPC executives, this tool serves as a strategic asset for evidence-based decision-making and stakeholder engagement.
+              Whether preparing briefing materials, identifying expert speakers for future events, tracking thematic trends across panels,
+              or responding to policy inquiries with concrete examples from conference discussions, the platform enables instant access to relevant content
+              with precise timestamps and context. Critically, when selecting papers and topics for future conferences, the platform makes it effortless to
+              ensure thematic continuity while preventing unwanted repetition—allowing organizers to identify gaps, avoid redundancy, and build on previous
+              discussions rather than inadvertently rehashing them. This capability not only maximizes the return on investment from conference programming
+              but also positions CSPC as a leader in knowledge mobilization, demonstrating how AI can bridge the gap between scientific discourse and policy.
+            </p>
 
-    st.markdown(user_guide_html, unsafe_allow_html=True)
+            <div style="margin-top: 25px; background: white; padding: 20px; border-radius: 10px;">
+              <div style="text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; border-radius: 10px; margin: -20px -20px 20px -20px;">
+                <h1 style="margin: 0; font-size: 2.1em;">CSPC AI PLATFORM</h1>
+                <p style="margin: 10px 0 0 0; font-size: 1em;">User Guide</p>
+              </div>
 
+              <div>
+                <h2 style="color: #667eea;">Getting Started</h2>
+                <p><strong>What is the CSPC AI Platform?</strong> An intelligent search system for exploring CSPC 2023 Conference insights.</p>
+
+                <h3 style="color: #764ba2;">How to Use</h3>
+                <div style="background: #e8f5e9; padding: 15px; border-radius: 5px; margin: 10px 0;">
+                  <strong>Example Questions:</strong>
+                  <ul>
+                    <li>"What was said about AI and scientific discovery?"</li>
+                    <li>"How did speakers address research security?"</li>
+                    <li>"What recommendations were made about science communication?"</li>
+                  </ul>
+                </div>
+
+                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin: 20px 0;">
+                  <div style="background: #e8f5e9; padding: 15px; border-radius: 8px; border: 2px solid #4caf50;">
+                    <h4 style="color: #2e7d32; margin-top: 0;">✓ DO:</h4>
+                    <ul style="margin: 5px 0 0 20px;">
+                      <li>Use clear, specific questions</li>
+                      <li>Try different phrasings</li>
+                      <li>Use filters to narrow results</li>
+                    </ul>
+                  </div>
+                  <div style="background: #ffebee; padding: 15px; border-radius: 8px; border: 2px solid #f44336;">
+                    <h4 style="color: #c62828; margin-top: 0;">✗ AVOID:</h4>
+                    <ul style="margin: 5px 0 0 20px;">
+                      <li>Extremely vague queries</li>
+                      <li>Single-word searches</li>
+                      <li>Content outside CSPC 2023</li>
+                    </ul>
+                  </div>
+                </div>
+
+                <div style="text-align: center; margin-top: 20px; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; color: white;">
+                  <em>Making every moment findable and every insight accessible.</em>
+                </div>
+              </div>
+            </div>
+
+          </div>
+        </details>
+      </div>
+    </body>
+    </html>
+    """
+
+    # Put it in a small column so it sits at top-left and stays small
+    col_about, _ = st.columns([0.3, 0.7])
+    with col_about:
+        components.html(html, height=450, scrolling=True)
 
 # ============================================================================
 # S3 CONFIGURATION
