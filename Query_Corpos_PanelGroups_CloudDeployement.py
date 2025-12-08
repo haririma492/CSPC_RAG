@@ -242,6 +242,16 @@ def main():
           }
           #MainMenu, footer {visibility: hidden;}
       </style>
+          .banner {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        text-align: center;
+        padding: 12px;
+        color: #ffffff;
+        font-weight: 700;
+        margin: 5px 0;
+    }
       """, unsafe_allow_html=True)
 
     # ========== SIDEBAR: ABOUT + USER GUIDE (RENDERED VIA HTML COMPONENT) ==========
@@ -383,8 +393,19 @@ def main():
         '<div class="banner" style="background:#005a92; font-size:1.6rem;">Phase I • CSPC 2023 Conference</div>',
         unsafe_allow_html=True)
     st.markdown(
-        '<div class="banner" style="background:#c41e3a; font-size:1.6rem;"> </div>',
-        unsafe_allow_html=True)
+        """
+        <div class="banner"
+             style="
+                background:#c41e3a;
+                font-size:1.6rem;
+                height:20px;
+                line-height:20px;
+             ">
+            &nbsp;
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
     # ========== MAIN QUESTION INPUT ==========
     _, col, _ = st.columns([0.1, 2.2, 0.1])
