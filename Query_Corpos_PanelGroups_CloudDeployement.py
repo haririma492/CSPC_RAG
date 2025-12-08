@@ -396,6 +396,125 @@ def time_to_seconds(time_str):
     except (ValueError, AttributeError):
         return 0
 
+def render_about_panel():
+    """
+    Proper left panel with scroll (both directions) showing
+    'About CSPC AI Platform' content.
+    """
+    # CSS to make the panel look like a real scrollable panel
+    st.markdown("""
+    <style>
+    .about-panel {
+        border: 1px solid #ddd;
+        border-radius: 8px;
+        padding: 10px 12px;
+        height: 78vh;              /* panel height; adjust if you like */
+        overflow-y: auto;          /* scroll down */
+        overflow-x: auto;          /* scroll right if needed */
+        box-sizing: border-box;
+        background-color: #fafafa;
+        font-family: "Segoe UI", sans-serif;
+        font-size: 0.85rem;
+    }
+    .about-panel h2, .about-panel h3, .about-panel h4 {
+        margin-top: 0.5rem;
+        margin-bottom: 0.5rem;
+    }
+    .about-panel p, .about-panel li {
+        font-size: 0.9rem;
+        line-height: 1.4;
+    }
+    .about-panel-title {
+        font-size: 0.8rem;
+        font-weight: 700;
+        letter-spacing: 0.08em;
+        text-transform: uppercase;
+        margin-bottom: 0.5rem;
+        color: #555;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+
+    st.markdown('<div class="about-panel">', unsafe_allow_html=True)
+
+    # Small key-like title at top
+    st.markdown('<div class="about-panel-title">ABOUT CSPC AI PLATFORM</div>', unsafe_allow_html=True)
+
+    # --- Why CSPC Needs AI Platform ---
+    st.markdown(
+        """
+        <h2>Why CSPC Needs AI Platform</h2>
+        <p>
+        The CSPC AI Platform represents a transformative approach to knowledge management and conference content accessibility.
+        Traditional conference proceedings often result in valuable insights becoming fragmented across hundreds of hours of recordings,
+        making it nearly impossible for executives and policy leaders to extract actionable intelligence efficiently.
+        This platform addresses that critical gap by transforming the entire CSPC 2023 conference archive into an instantly searchable,
+        AI-powered knowledge base where every discussion, recommendation, and insight becomes immediately accessible and actionable.
+        </p>
+        <p>
+        For CSPC executives, this tool serves as a strategic asset for evidence-based decision-making and stakeholder engagement.
+        Whether preparing briefing materials, identifying expert speakers for future events, tracking thematic trends across panels,
+        or responding to policy inquiries with concrete examples from conference discussions, the platform enables instant access to relevant content
+        with precise timestamps and context. Critically, when selecting papers and topics for future conferences, the platform makes it effortless to
+        ensure thematic continuity while preventing unwanted repetition—allowing organizers to identify gaps, avoid redundancy, and build on previous
+        discussions rather than inadvertently rehashing them. This capability not only maximizes the return on investment from conference programming
+        but also positions CSPC as a leader in knowledge mobilization, demonstrating how AI can bridge the gap between scientific discourse and policy.
+        </p>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # --- Existing User Guide content ---
+    st.markdown(
+        """
+        <div style="margin-top: 20px; background: white; padding: 16px; border-radius: 10px;">
+          <div style="text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 18px; border-radius: 10px; margin: -16px -16px 16px -16px;">
+            <h2 style="margin: 0; font-size: 1.6em;">CSPC AI PLATFORM</h2>
+            <p style="margin: 8px 0 0 0; font-size: 0.95em;">User Guide</p>
+          </div>
+
+          <h3 style="color: #667eea;">Getting Started</h3>
+          <p><strong>What is the CSPC AI Platform?</strong> An intelligent search system for exploring CSPC 2023 Conference insights.</p>
+
+          <h3 style="color: #764ba2;">How to Use</h3>
+          <div style="background: #e8f5e9; padding: 12px; border-radius: 5px; margin: 10px 0;">
+            <strong>Example Questions:</strong>
+            <ul>
+              <li>"What was said about AI and scientific discovery?"</li>
+              <li>"How did speakers address research security?"</li>
+              <li>"What recommendations were made about science communication?"</li>
+            </ul>
+          </div>
+
+          <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0;">
+            <div style="background: #e8f5e9; padding: 12px; border-radius: 8px; border: 2px solid #4caf50;">
+              <h4 style="color: #2e7d32; margin-top: 0;">✓ DO:</h4>
+              <ul style="margin: 5px 0 0 20px;">
+                <li>Use clear, specific questions</li>
+                <li>Try different phrasings</li>
+                <li>Use filters to narrow results</li>
+              </ul>
+            </div>
+            <div style="background: #ffebee; padding: 12px; border-radius: 8px; border: 2px solid #f44336;">
+              <h4 style="color: #c62828; margin-top: 0;">✗ AVOID:</h4>
+              <ul style="margin: 5px 0 0 20px;">
+                <li>Extremely vague queries</li>
+                <li>Single-word searches</li>
+                <li>Content outside CSPC 2023</li>
+              </ul>
+            </div>
+          </div>
+
+          <div style="text-align: center; margin-top: 16px; padding: 12px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; color: white;">
+            <em>Making every moment findable and every insight accessible.</em>
+          </div>
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    st.markdown("</div>", unsafe_allow_html=True)
+
 
 # ============================================================================
 # MAIN APPLICATION
@@ -481,7 +600,129 @@ def main():
     """, unsafe_allow_html=True)
 
     # ========== USER GUIDE (Very Top Left) ==========
-    show_user_guide()
+    # ========== CUSTOM CSS ==========
+    st.markdown("""
+      <style>
+          .main > div {padding-top:0!important;}
+          .block-container {padding-top:1rem!important; max-width:95%!important; font-size:1.1rem;}
+          #MainMenu, footer, header {visibility:hidden;}
+          .banner {text-align:center; padding:12px; color:white; font-weight:bold; margin:5px 0;}
+          .panel-header {background:#f0f2f6; padding:15px; border-radius:10px; margin:10px 0;}
+          .photo-container {border: 2px solid #ddd; border-radius: 8px; padding: 5px;}
+
+          p, li, span, label {font-size: 1.3rem !important;}
+
+          .panel-metadata {font-size: 1.9rem !important; line-height: 2.4;}
+          .panel-number {font-size: 1.8rem !important; font-weight: bold; margin-bottom: 0.5rem !important; color: #00426a;}
+          .panel-title {font-size: 2.4rem !important; font-weight: bold; line-height: 1.3; margin-bottom: 1.5rem !important;}
+          .chunks-header {font-size: 1.6rem !important; font-weight: bold !important; margin: 1.5rem 0 1rem 0 !important;}
+          input[type="text"] {font-size: 1.5rem !important; padding: 1rem !important;}
+          .stCaption, [data-testid="stCaptionContainer"] {font-size: 1.1rem !important;}
+          button {font-size: 1.3rem !important;}
+          audio {width: 100%;}
+
+          .chunk-root {
+              border: 1px solid #ccc;
+              border-radius: 6px;
+              padding: 0.75rem 0.9rem;
+              margin-bottom: 1.1rem;
+              background-color: #fdfdfd;
+          }
+
+          .results-header {
+              font-size: 2rem;
+              font-weight: bold;
+              margin: 1.5rem 0 1rem 0;
+              color: #00426a;
+          }
+
+          .panel-separator {
+              border: none;
+              border-top: 2px solid #ccc;
+              margin: 2rem 0;
+          }
+
+          .debug-box {
+              background-color: #fff3cd;
+              border: 2px solid #ffc107;
+              border-radius: 8px;
+              padding: 15px;
+              margin: 10px 0;
+              font-family: monospace;
+              font-size: 0.9rem;
+          }
+
+          .debug-success {
+              background-color: #d4edda;
+              border-color: #28a745;
+              color: #155724;
+          }
+
+          .debug-error {
+              background-color: #f8d7da;
+              border-color: #dc3545;
+              color: #721c24;
+          }
+
+          .debug-info {
+              background-color: #d1ecf1;
+              border-color: #17a2b8;
+              color: #0c5460;
+          }
+
+          .debug-warning {
+              background-color: #fff3cd;
+              border-color: #ffc107;
+              color: #856404;
+          }
+      </style>
+      """, unsafe_allow_html=True)
+
+    # ========== LAYOUT: LEFT PANEL + RIGHT MAIN ==========
+    left_col, right_col = st.columns([1.0, 4.0])
+
+    # LEFT: About panel
+    with left_col:
+        render_about_panel()
+
+    # RIGHT: everything else that was previously in main()
+    with right_col:
+        # ========== HEADER ==========
+        col1, col2 = st.columns([1.3, 4])
+        with col1:
+            st.image("https://sciencepolicy.ca/wp-content/uploads/2020/09/cspc-logo.png", width=300)
+        with col2:
+            st.markdown(
+                """
+                <div style="
+                    display:flex;
+                    align-items:center;
+                    margin-left:15px;
+                    gap: 1.5rem;
+                    color:#00426a;
+                ">
+                    <div style="font-size:3rem; font-weight:bold; color:#00426a;">
+                        CSPC AI Platform
+                    </div>
+                    <div style="font-size:1.5rem; font-style:italic; color:#00426a;">
+                        .. where every moment is found & could be actionable
+                    </div>
+                </div>
+                """,
+                unsafe_allow_html=True
+            )
+
+        st.markdown(
+            '<div class="banner" style="background:#005a92; font-size:1.6rem;">Phase I • CSPC 2023 Conference</div>',
+            unsafe_allow_html=True)
+        st.markdown(
+            '<div class="banner" style="background:#c41e3a; font-size:1.6rem;"> </div>',
+            unsafe_allow_html=True)
+
+        # === and from here downward, keep your existing RIGHT-SIDE code ===
+        # (sidebar config, question box, search, results, etc.)
+        # i.e., everything that was under your previous "HEADER" comment
+        # stays the same, just indented under `with right_col:`
 
     # ========== HEADER ==========
     col1, col2 = st.columns([1.3, 4])
