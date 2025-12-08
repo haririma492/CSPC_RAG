@@ -389,22 +389,36 @@ def main():
             unsafe_allow_html=True
         )
 
-    st.markdown(
-        '<div class="banner" style="background:#005a92; font-size:1.6rem;">Phase I • CSPC 2023 Conference</div>',
-        unsafe_allow_html=True)
+    # Blue banner – centered, white text
     st.markdown(
         """
-        <div class="banner"
-             style="
-                background:#c41e3a;
-                font-size:1.6rem;
-                height:20px;
-                line-height:20px;
-             ">
+        <div style="
+            background:#005a92;
+            font-size:1.6rem;
+            color:#ffffff;
+            text-align:center;
+            font-weight:700;
+            padding:12px 8px;
+            margin:5px 0;
+        ">
+            Phase I • CSPC 2023 Conference
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
+
+    # Red banner – visible strip under it (optional)
+    st.markdown(
+        """
+        <div style="
+            background:#c41e3a;
+            height:20px;
+            margin:0 0 10px 0;
+        ">
             &nbsp;
         </div>
         """,
-        unsafe_allow_html=True
+        unsafe_allow_html=True,
     )
 
     # ========== MAIN QUESTION INPUT ==========
