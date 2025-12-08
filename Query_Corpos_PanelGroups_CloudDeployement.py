@@ -115,24 +115,6 @@ def show_user_guide():
 
     <h2 style="color:#333; margin-top:0;">About CSPC AI Platform</h2>
 
-    <h3 style="color:#333; margin-top:1rem;">Why CSPC Needs AI Platform</h3>
-    <p>
-      The CSPC AI Platform represents a transformative approach to knowledge management and conference content accessibility.
-      Traditional conference proceedings often result in valuable insights becoming fragmented across hundreds of hours of recordings,
-      making it nearly impossible for executives and policy leaders to extract actionable intelligence efficiently.
-      This platform addresses that critical gap by transforming the entire CSPC 2023 conference archive into an instantly searchable,
-      AI-powered knowledge base where every discussion, recommendation, and insight becomes immediately accessible and actionable.
-    </p>
-    <p>
-      For CSPC executives, this tool serves as a strategic asset for evidence-based decision-making and stakeholder engagement.
-      Whether preparing briefing materials, identifying expert speakers for future events, tracking thematic trends across panels,
-      or responding to policy inquiries with concrete examples from conference discussions, the platform enables instant access to relevant content
-      with precise timestamps and context. Critically, when selecting papers and topics for future conferences, the platform makes it effortless to
-      ensure thematic continuity while preventing unwanted repetition—allowing organizers to identify gaps, avoid redundancy, and build on previous
-      discussions rather than inadvertently rehashing them. This capability not only maximizes the return on investment from conference programming
-      but also positions CSPC as a leader in knowledge mobilization, demonstrating how AI can bridge the gap between scientific discourse and policy.
-    </p>
-
     <div style="margin-top: 25px; background: white; padding: 20px; border-radius: 10px;">
       <div style="text-align: center; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; padding: 25px; border-radius: 10px; margin: -20px -20px 20px -20px;">
         <h1 style="margin: 0; font-size: 2.1em;">CSPC AI PLATFORM</h1>
@@ -171,6 +153,25 @@ def show_user_guide():
             </ul>
           </div>
         </div>
+
+    <h3 style="color:#333; margin-top:1rem;">Why CSPC Needs AI Platform</h3>
+    <p>
+      The CSPC AI Platform represents a transformative approach to knowledge management and conference content accessibility.
+      Traditional conference proceedings often result in valuable insights becoming fragmented across hundreds of hours of recordings,
+      making it nearly impossible for executives and policy leaders to extract actionable intelligence efficiently.
+      This platform addresses that critical gap by transforming the entire CSPC 2023 conference archive into an instantly searchable,
+      AI-powered knowledge base where every discussion, recommendation, and insight becomes immediately accessible and actionable.
+    </p>
+    <p>
+      For CSPC executives, this tool serves as a strategic asset for evidence-based decision-making and stakeholder engagement.
+      Whether preparing briefing materials, identifying expert speakers for future events, tracking thematic trends across panels,
+      or responding to policy inquiries with concrete examples from conference discussions, the platform enables instant access to relevant content
+      with precise timestamps and context. Critically, when selecting papers and topics for future conferences, the platform makes it effortless to
+      ensure thematic continuity while preventing unwanted repetition—allowing organizers to identify gaps, avoid redundancy, and build on previous
+      discussions rather than inadvertently rehashing them. This capability not only maximizes the return on investment from conference programming
+      but also positions CSPC as a leader in knowledge mobilization, demonstrating how AI can bridge the gap between scientific discourse and policy.
+    </p>
+
 
         <div style="text-align: center; margin-top: 20px; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; color: white;">
           <em>Making every moment findable and every insight accessible.</em>
@@ -1067,6 +1068,7 @@ def main():
                     st.exception(e)
 
     # ========== OPTIONAL STATUS IN SIDEBAR (REMOVE IF YOU WANT CLEANEST UI) ==========
+
     with st.sidebar:
         st.markdown("---")
         st.markdown("### Status")
@@ -1077,6 +1079,7 @@ def main():
             st.caption(f"CSPC_Panels: {'Yes' if 'CSPC_Panels' in collections else 'No'}")
         except Exception:
             st.error("Not connected")
+
 
 
 
