@@ -575,7 +575,7 @@ def main():
     <style>
         .main > div {padding-top:0!important;}
         .block-container {padding-top:1rem!important; max-width:95%!important; font-size:1.1rem;}
-        #MainMenu, footer, header {visibility:hidden;}
+        #MainMenu, footer {visibility:hidden;}  /* keep header visible so sidebar toggle works */
         .banner {text-align:center; padding:12px; color:white; font-weight:bold; margin:5px 0;}
         .panel-header {background:#f0f2f6; padding:15px; border-radius:10px; margin:10px 0;}
         .photo-container {border: 2px solid #ddd; border-radius: 8px; padding: 5px;}
@@ -648,21 +648,26 @@ def main():
     </style>
     """, unsafe_allow_html=True)
 
-    # LEFT: About panel
-    with st.sidebar:
-        render_about_in_sidebar()
+    # ========== SIDEBAR (END-USER: ONLY ABOUT) ==========
+    render_about_in_sidebar()
 
-        st.markdown(
-            '<div class="banner" style="background:#005a92; font-size:1.6rem;">Phase I • CSPC 2023 Conference</div>',
-            unsafe_allow_html=True)
-        st.markdown(
-            '<div class="banner" style="background:#c41e3a; font-size:1.6rem;"> </div>',
-            unsafe_allow_html=True)
+    # ========== CONFIG (FROM ENV, NOT SIDEBAR) ==========
+    weaviate_url = os.getenv(
+        "WEAVIATE_URL",
+        "nsrnedu9q1qfxusokfl8q.c0.us-west3.gcp.weaviate.cloud"
+    )
+    weaviate_key = os.getenv("WEAVIATE_API_KEY", "")
+    openai_key = os.getenv("OPENAI_API_KEY", "")
+    collection_name = os.getenv("WEAVIATE_COLLECTION", "DocChunk")
 
-        # === and from here downward, keep your existing RIGHT-SIDE code ===
-        # (sidebar config, question box, search, results, etc.)
-        # i.e., everything that was under your previous "HEADER" comment
-        # stays the same, just indented under `with right_col:`
+    # Fixed defaults for end-users (no sliders/toggles)
+    alpha = 0.75
+    top_k = 10
+    use_reranker = True
+    use_llm = True
+    debug_mode = False
+    show_audio_debug = False
+    test_s3_urls = False
 
     # ========== HEADER ==========
     col1, col2 = st.columns([1.3, 4])
@@ -695,48 +700,6 @@ def main():
     st.markdown(
         '<div class="banner" style="background:#c41e3a; font-size:1.6rem;"> </div>',
         unsafe_allow_html=True)
-
-    # ========== SIDEBAR ==========
-    with st.sidebar:
-        st.header("Configuration")
-        weaviate_url = st.text_input(
-            "Weaviate URL",
-            value=os.getenv("WEAVIATE_URL", "nsrnedu9q1qfxusokfl8q.c0.us-west3.gcp.weaviate.cloud"),
-            key="cfg_weaviate_url"
-        )
-
-        weaviate_key = st.text_input(
-            "Weaviate Key",
-            type="password",
-            value=os.getenv("WEAVIATE_API_KEY", ""),
-            key="cfg_weaviate_key"
-        )
-
-        openai_key = st.text_input(
-            "OpenAI Key",
-            type="password",
-            value=os.getenv("OPENAI_API_KEY", ""),
-            key="cfg_openai_key"
-        )
-
-        collection_name = st.text_input(
-            "Chunks Collection",
-            "DocChunk",
-            key="cfg_collection"
-        )
-
-        st.markdown("---")
-        st.subheader("Search Settings")
-        alpha = st.slider("Hybrid Alpha", 0.0, 1.0, 0.75, key="cfg_alpha")
-        top_k = st.number_input("Top Results", 1, 30, 10, key="cfg_topk")
-        use_reranker = st.checkbox("Use Reranker", True, key="cfg_reranker")
-        use_llm = st.checkbox("Generate AI Answer", True, key="cfg_llm")
-
-        st.markdown("---")
-        st.subheader("Debug")
-        debug_mode = st.checkbox("Enable Debug Mode", False, key="cfg_debug")
-        show_audio_debug = st.checkbox("Show Audio Debug Details", False, key="cfg_audio_debug")
-        test_s3_urls = st.checkbox("Test S3 URL Accessibility", False, key="cfg_test_urls")
 
     # ========== MAIN QUESTION INPUT ==========
     _, col, _ = st.columns([0.1, 2.2, 0.1])
@@ -859,7 +822,7 @@ def main():
             st.warning("Please enter a question.")
             st.stop()
         if not openai_key.startswith("sk-"):
-            st.error("Please provide a valid OpenAI API key.")
+            st.error("Service temporarily unavailable. (Missing OpenAI key on server.)")
             st.stop()
 
         with st.spinner("Searching..."):
@@ -1043,7 +1006,6 @@ def main():
                                 else:
                                     st.caption(f"Time: {time_str}")
 
-                                # ========== AUDIO URL GENERATION ==========
                                 file_name = chunk_props.get("file_name")
 
                                 if show_audio_debug:
@@ -1054,7 +1016,6 @@ def main():
                                     st.code(f"time: {time_str} ({time_to_seconds(time_str)}s)")
 
                                 if file_name:
-                                    # Remove _transcript.txt suffix properly
                                     audio_filename = file_name
 
                                     if audio_filename.endswith("_transcript.txt"):
@@ -1066,8 +1027,6 @@ def main():
                                         audio_filename = audio_filename[:-len("_transcript")]
 
                                     audio_filename = audio_filename + ".mp3"
-
-                                    # Build S3 URL with proper encoding
                                     audio_url = f"https://cspc-rag.s3.ca-central-1.amazonaws.com/audio/{quote(audio_filename)}"
 
                                     if show_audio_debug:
@@ -1107,6 +1066,7 @@ def main():
                 if debug_mode:
                     st.exception(e)
 
+    # ========== OPTIONAL STATUS IN SIDEBAR (REMOVE IF YOU WANT CLEANEST UI) ==========
     with st.sidebar:
         st.markdown("---")
         st.markdown("### Status")
@@ -1117,6 +1077,7 @@ def main():
             st.caption(f"CSPC_Panels: {'Yes' if 'CSPC_Panels' in collections else 'No'}")
         except Exception:
             st.error("Not connected")
+
 
 
 if __name__ == "__main__":
