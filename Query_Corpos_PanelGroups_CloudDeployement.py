@@ -155,6 +155,18 @@ def show_user_guide():
         </div>
 
     <h3 style="color:#333; margin-top:1rem;">Why CSPC Needs AI Platform</h3>
+
+        <div style="text-align: center; margin-top: 20px; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; color: white;">
+          <em>Making every moment findable and every insight accessible.</em>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</details>
+</div>
+</div>
+
     <p>
       The CSPC AI Platform represents a transformative approach to knowledge management and conference content accessibility.
       Traditional conference proceedings often result in valuable insights becoming fragmented across hundreds of hours of recordings,
@@ -172,17 +184,6 @@ def show_user_guide():
       but also positions CSPC as a leader in knowledge mobilization, demonstrating how AI can bridge the gap between scientific discourse and policy.
     </p>
 
-
-        <div style="text-align: center; margin-top: 20px; padding: 15px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border-radius: 10px; color: white;">
-          <em>Making every moment findable and every insight accessible.</em>
-        </div>
-      </div>
-    </div>
-
-  </div>
-</details>
-</div>
-</div>
 """
 
     st.markdown(about_html, unsafe_allow_html=True)
@@ -1069,16 +1070,6 @@ def main():
 
     # ========== OPTIONAL STATUS IN SIDEBAR (REMOVE IF YOU WANT CLEANEST UI) ==========
 
-    with st.sidebar:
-        st.markdown("---")
-        st.markdown("### Status")
-        try:
-            collections = client.collections.list_all()
-            st.success("Connected to Weaviate")
-            st.caption(f"DocChunk: {'Yes' if 'DocChunk' in collections else 'No'}")
-            st.caption(f"CSPC_Panels: {'Yes' if 'CSPC_Panels' in collections else 'No'}")
-        except Exception:
-            st.error("Not connected")
 
 
 
