@@ -817,6 +817,7 @@ def main():
                                     """,
                                     unsafe_allow_html=True
                                 )
+                            st.write("")
                             theme = panel_metadata.get("theme") or first_chunk.get("panel_theme", "N/A")
                             organized_by = panel_metadata.get("organized_by")
                             speakers = panel_metadata.get("speakers")
