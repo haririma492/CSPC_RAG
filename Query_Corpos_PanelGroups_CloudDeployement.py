@@ -802,7 +802,6 @@ def main():
 
                         title_col, photo_col = st.columns([1, 1])
                         with title_col:
-                            st.markdown(f'<div class="panel-number">Panel {panel_code}</div>', unsafe_allow_html=True)
                             if panel_metadata.get("title"):
                                 st.markdown(
                                     f"""
