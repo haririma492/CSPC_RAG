@@ -254,32 +254,37 @@ def main():
             background-color: #ffffff00 !important;
         }
         </style>
-            <style>
-    /* 🔹 TEXT INPUT (question box) – stronger border */
-    [data-testid="stTextInput"] > div > div {
-        border: 2px solid #00426a !important;   /* darker, visible border */
-        border-radius: 0.55rem !important;
-    }
-
-    /* 🔹 THEME / PANEL SELECTBOX – stronger border */
-    [data-testid="stSelectbox"] div[data-baseweb="select"] > div {
-        border: 2px solid #00426a !important;   /* same color as button/banners */
-        border-radius: 0.55rem !important;
-        background-color: #ffffff !important;   /* keep them white */
-    }
-
-    /* 🔹 Optional: highlight on focus (when user clicks into them) */
-    [data-testid="stTextInput"] > div > div:focus-within,
-    [data-testid="stSelectbox"] div[data-baseweb="select"] > div:focus-within {
-        border-color: #c41e3a !important;       /* CSPC red on focus */
-        box-shadow: 0 0 0 1px #c41e3a33;
-    }
-    </style>
+        
         """,
         unsafe_allow_html=True,
     )
 
+    st.markdown(
+        """
+        <style>
+        /* 🔹 TEXT INPUT (question box) – stronger border */
+        [data-testid="stTextInput"] > div > div {
+            border: 2px solid #00426a !important;   /* darker, visible border */
+            border-radius: 0.55rem !important;
+        }
 
+        /* 🔹 THEME / PANEL SELECTBOX – stronger border */
+        [data-testid="stSelectbox"] div[data-baseweb="select"] > div {
+            border: 2px solid #00426a !important;   /* same color as button/banners */
+            border-radius: 0.55rem !important;
+            background-color: #ffffff !important;   /* keep them white */
+        }
+
+        /* 🔹 Optional: highlight on focus (when user clicks into them) */
+        [data-testid="stTextInput"] > div > div:focus-within,
+        [data-testid="stSelectbox"] div[data-baseweb="select"] > div:focus-within {
+            border-color: #c41e3a !important;       /* CSPC red on focus */
+            box-shadow: 0 0 0 1px #c41e3a33;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
 
     st.markdown(
         """
