@@ -218,51 +218,45 @@ def time_to_seconds(time_str):
 # ============================================================================
 
 def main():
-    def main():
-        # 🔒 Force global light background & text colors
-        st.markdown("""
-            <style>
-            /* Main app background */
-            [data-testid="stAppViewContainer"] {
-                background-color: #ffffff !important;
-            }
 
-            /* The block that holds your content */
-            .block-container {
-                background-color: #ffffff !important;
-                color: #000000 !important;
-            }
+    # 🔒 FORCE LIGHT BACKGROUND EVERYWHERE
+    st.markdown(
+        """
+        <style>
+        /* Global app background */
+        html, body, [data-testid="stApp"], [data-testid="stAppViewContainer"] {
+            background-color: #ffffff !important;
+            color: #000000 !important;
+        }
 
-            /* Sidebar background */
-            [data-testid="stSidebar"] {
-                background-color: #f7f7f7 !important;
-                color: #000000 !important;
-            }
+        /* Main content container */
+        .block-container {
+            background-color: #ffffff !important;
+            color: #000000 !important;
+            padding-top: 2rem !important;
+            max-width: 95% !important;
+            font-size: 1.1rem;
+        }
 
-            /* Generic text color (catch-all) */
-            body, p, div, span, label {
-                color: #000000 !important;
-            }
-            </style>
-        """, unsafe_allow_html=True)
+        /* Sidebar */
+        [data-testid="stSidebar"] {
+            background-color: #f7f7f7 !important;
+            color: #000000 !important;
+        }
 
-    # ========== CUSTOM CSS ==========
-    st.markdown("""
-      <style>
-          .block-container {
-              padding-top: 2rem !important;
-              max-width: 95% !important;
-              font-size: 1.1rem;
-          }
-          #MainMenu, footer {visibility: hidden;}
-          .panel-separator {
-              border: none;
-              border-top: 2px solid #ccc;
-              margin: 2rem 0;
-          }
+        /* Generic text */
+        p, div, span, label {
+            color: #000000 !important;
+        }
 
-      </style>
-      """, unsafe_allow_html=True)
+        /* Optional: remove any dark overlay / margins some themes add */
+        [data-testid="stHeader"] {
+            background-color: #ffffff00 !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
 
     # ========== SIDEBAR: ABOUT + USER GUIDE ==========
     with st.sidebar:
