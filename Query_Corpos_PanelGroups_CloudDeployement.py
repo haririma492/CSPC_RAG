@@ -569,9 +569,9 @@ def main():
         st.markdown(
             """
             <style>
-            /* Primary button styling */
-            button[kind="primary"],
+            /* Main Search button */
             div.stButton > button,
+            button[kind="primary"],
             button[data-testid="baseButton-primary"] {
                 background-color: #00426a !important;
                 color: #ffffff !important;
@@ -581,12 +581,19 @@ def main():
                 border: 2px solid #003356 !important;
             }
 
-            button[kind="primary"]:hover,
+            /* Make sure the *inner text* is white too */
+            div.stButton > button * ,
+            button[kind="primary"] * ,
+            button[data-testid="baseButton-primary"] * {
+                color: #ffffff !important;
+            }
+
+            /* Hover state */
             div.stButton > button:hover,
+            button[kind="primary"]:hover,
             button[data-testid="baseButton-primary"]:hover {
                 background-color: #005a92 !important;
                 border-color: #003356 !important;
-                color: #ffffff !important;
             }
             </style>
             """,
