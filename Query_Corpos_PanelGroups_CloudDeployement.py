@@ -818,39 +818,39 @@ def main():
                                     """,
                                     unsafe_allow_html=True
                                 )
-                        theme = panel_metadata.get("theme") or first_chunk.get("panel_theme", "N/A")
-                        organized_by = panel_metadata.get("organized_by")
-                        speakers = panel_metadata.get("speakers")
-                        panel_date = panel_metadata.get("panel_date")
-                        panel_url = panel_metadata.get("panel_url")
+                            theme = panel_metadata.get("theme") or first_chunk.get("panel_theme", "N/A")
+                            organized_by = panel_metadata.get("organized_by")
+                            speakers = panel_metadata.get("speakers")
+                            panel_date = panel_metadata.get("panel_date")
+                            panel_url = panel_metadata.get("panel_url")
 
-                        # Build one compact HTML block
-                        meta_html = '<div class="panel-metadata">'
+                            # Build one compact HTML block
+                            meta_html = '<div class="panel-metadata">'
 
-                        meta_html += f'<div><strong>Theme:</strong> {theme}</div>'
+                            meta_html += f'<div><strong>Theme:</strong> {theme}</div>'
 
-                        if organized_by:
-                            meta_html += f'<div><strong>Organized by:</strong> {organized_by}</div>'
+                            if organized_by:
+                                meta_html += f'<div><strong>Organized by:</strong> {organized_by}</div>'
 
-                        if speakers:
-                            if isinstance(speakers, list):
-                                speakers_str = ", ".join(speakers)
-                            else:
-                                speakers_str = speakers
-                            meta_html += f'<div><strong>Speakers:</strong> {speakers_str}</div>'
+                            if speakers:
+                                if isinstance(speakers, list):
+                                    speakers_str = ", ".join(speakers)
+                                else:
+                                    speakers_str = speakers
+                                meta_html += f'<div><strong>Speakers:</strong> {speakers_str}</div>'
 
-                        if panel_date:
-                            meta_html += f'<div><strong>Date:</strong> {panel_date}</div>'
+                            if panel_date:
+                                meta_html += f'<div><strong>Date:</strong> {panel_date}</div>'
 
-                        if panel_url:
-                            meta_html += (
-                                f'<div><strong>Panel URL:</strong> '
-                                f'<a href="{panel_url}" target="_blank">{panel_url}</a></div>'
-                            )
+                            if panel_url:
+                                meta_html += (
+                                    f'<div><strong>Panel URL:</strong> '
+                                    f'<a href="{panel_url}" target="_blank">{panel_url}</a></div>'
+                                )
 
-                        meta_html += '</div>'
+                            meta_html += '</div>'
 
-                        st.markdown(meta_html, unsafe_allow_html=True)
+                            st.markdown(meta_html, unsafe_allow_html=True)
 
                         with photo_col:
                             photo_url = panel_metadata.get("speaker_photo_url") or panel_metadata.get("photo_url")
