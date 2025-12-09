@@ -218,7 +218,22 @@ def time_to_seconds(time_str):
 # ============================================================================
 
 def main():
-
+    # Blue banner
+    st.markdown(
+        """
+        <div class="cspc-phase-banner" style="
+            background:#005a92;
+            font-size:1.6rem;
+            text-align:center;
+            font-weight:700;
+            padding:12px 8px;
+            margin:5px 0;
+        ">
+            Phase I • CSPC 2023 Conference
+        </div>
+        """,
+        unsafe_allow_html=True,
+    )
     # 🔒 FORCE LIGHT BACKGROUND EVERYWHERE
     st.markdown(
         """
@@ -517,22 +532,7 @@ def main():
             unsafe_allow_html=True
         )
 
-    # Blue banner
-    st.markdown(
-        """
-        <div class="cspc-phase-banner" style="
-            background:#005a92;
-            font-size:1.6rem;
-            text-align:center;
-            font-weight:700;
-            padding:12px 8px;
-            margin:5px 0;
-        ">
-            Phase I • CSPC 2023 Conference
-        </div>
-        """,
-        unsafe_allow_html=True,
-    )
+
 
     # Red banner – Powered by olgoo.com
     st.markdown(
