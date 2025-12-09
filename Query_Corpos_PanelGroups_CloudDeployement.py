@@ -811,14 +811,13 @@ def main():
                                         font-weight: 700;
                                         color: #002a5c;
                                         line-height: 1.2;
-                                        margin-bottom: 1.5rem;
+                                        margin-bottom: .2rem;
                                     ">
                                         {panel_metadata["title"]}
                                     </div>
                                     """,
                                     unsafe_allow_html=True
                                 )
-
                         theme = panel_metadata.get("theme") or first_chunk.get("panel_theme", "N/A")
                         organized_by = panel_metadata.get("organized_by")
                         speakers = panel_metadata.get("speakers")
