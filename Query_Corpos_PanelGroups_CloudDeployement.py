@@ -831,8 +831,7 @@ def main():
                             organized_by = panel_metadata.get("organized_by")
                             speakers = panel_metadata.get("speakers")
                             panel_date = panel_metadata.get("panel_date")
-                            st.write("\n")  # Single newline
-                            st.write("&nbsp;")  # Non-breaking space (HTML)
+                            st.write("\n")
 
                             panel_url = panel_metadata.get("panel_url")
 
