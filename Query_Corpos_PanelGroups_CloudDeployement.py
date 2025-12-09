@@ -875,7 +875,7 @@ def main():
                             font-size: 1.6rem;
                             font-weight: bold;
                             display: inline-block;
-                            border-bottom: 3px solid #00426a;
+                            border-bottom: 1px solid #00426a;
                             padding-bottom: 6px;
                             line-height: 1.4;
                             margin: 1.5rem 0 1rem 0;
