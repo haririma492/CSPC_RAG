@@ -258,6 +258,51 @@ def main():
         unsafe_allow_html=True,
     )
 
+
+
+    st.markdown(
+        """
+        <style>
+        /* 🔒 FORCE LIGHT INPUTS & DROPDOWNS */
+
+        /* Text input (question box, etc.) */
+        input[type="text"], textarea {
+            background-color: #ffffff !important;
+            color: #000000 !important;
+        }
+
+        /* Placeholder text inside inputs */
+        input::placeholder, textarea::placeholder {
+            color: #666666 !important;
+        }
+
+        /* Streamlit text input inner box */
+        [data-testid="stTextInput"] input {
+            background-color: #ffffff !important;
+            color: #000000 !important;
+        }
+
+        /* Streamlit selectbox (THEME / PANEL header text) */
+        [data-testid="stSelectbox"] > div {
+            color: #000000 !important;
+        }
+
+        /* The visible selected value box */
+        [data-testid="stSelectbox"] div[data-baseweb="select"] > div {
+            background-color: #ffffff !important;
+            color: #000000 !important;
+        }
+
+        /* Dropdown menu items */
+        [data-testid="stSelectbox"] li, 
+        [data-testid="stSelectbox"] span {
+            color: #000000 !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
+
     # ========== SIDEBAR: ABOUT + USER GUIDE ==========
     with st.sidebar:
         with st.expander("📖 About CSPC AI Platform", expanded=False):
