@@ -786,6 +786,17 @@ def main():
                         unsafe_allow_html=True
                     )
                     st.write("")
+                    st.markdown(
+                        """
+                        <hr style="
+                            border: none;
+                            border-top: .5px solid #dddddd;
+                            margin: .5rem 0;
+                            width: 100%;
+                        ">
+                        """,
+                        unsafe_allow_html=True,
+                    )
 
                     panel_order = []
                     for panel_code, items in panels_dict.items():
