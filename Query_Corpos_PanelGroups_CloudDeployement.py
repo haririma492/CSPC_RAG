@@ -246,7 +246,7 @@ def main():
 
         /* Generic text */
         p, div, span, label {
-            color: #000000 !important;
+            color: #000000 ;
         }
 
         /* Optional: remove any dark overlay / margins some themes add */
