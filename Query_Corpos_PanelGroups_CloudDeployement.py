@@ -879,10 +879,12 @@ def main():
                             padding-bottom: 6px;
                             line-height: 1.4;
                             margin: 1.5rem 0 1rem 0;
+                            color: #002a5c;   /* 👈 TEXT COLOR HERE */
                         ">
                         {len(items)} relevant chunk{"s" if len(items) != 1 else ""} from this panel:
                         </div>
                         """, unsafe_allow_html=True)
+
 
                         sorted_items = sorted(items, key=lambda x: x["rank"])
                         chunk_col1, chunk_col2 = st.columns(2)
