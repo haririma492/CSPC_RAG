@@ -782,6 +782,7 @@ def main():
                         """,
                         unsafe_allow_html=True
                     )
+                    st.write("")
                     st.markdown(
                         """
                         <hr style="
@@ -830,6 +831,7 @@ def main():
                             speakers = panel_metadata.get("speakers")
                             panel_date = panel_metadata.get("panel_date")
                             st.write(" ")
+
                             panel_url = panel_metadata.get("panel_url")
 
                             # Build one compact HTML block
