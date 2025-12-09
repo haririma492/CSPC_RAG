@@ -822,6 +822,7 @@ def main():
                             organized_by = panel_metadata.get("organized_by")
                             speakers = panel_metadata.get("speakers")
                             panel_date = panel_metadata.get("panel_date")
+                            st.write("")
                             panel_url = panel_metadata.get("panel_url")
 
                             # Build one compact HTML block
