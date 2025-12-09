@@ -356,6 +356,36 @@ def main():
         """,
         unsafe_allow_html=True,
     )
+    st.markdown(
+        """
+        <style>
+        /* 🔥 FORCE LIGHT DROPDOWNS FOR THEME & PANEL */
+
+        /* BaseWeb popover that holds the dropdown menu */
+        div[data-baseweb="popover"],
+        div[data-baseweb="popover"] * {
+            background-color: #ffffff !important;
+            color: #000000 !important;
+        }
+
+        /* Listbox container for options (extra safety) */
+        ul[role="listbox"],
+        ul[role="listbox"] > li,
+        ul[role="listbox"] > li * {
+            background-color: #ffffff !important;
+            color: #000000 !important;
+        }
+
+        /* Hover / selected option */
+        ul[role="listbox"] > li[aria-selected="true"],
+        ul[role="listbox"] > li:hover {
+            background-color: #e6f2ff !important;
+            color: #000000 !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
 
     # ========== SIDEBAR: ABOUT + USER GUIDE ==========
     with st.sidebar:
