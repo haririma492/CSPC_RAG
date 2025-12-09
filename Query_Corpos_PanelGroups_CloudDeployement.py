@@ -285,6 +285,34 @@ def main():
         """,
         unsafe_allow_html=True,
     )
+    st.markdown(
+        """
+        <style>
+        /* 🔹 DROPDOWN MENU (THEME & PANEL) – light background, dark text */
+
+        /* The dropdown options container */
+        div[role="listbox"] {
+            background-color: #ffffff !important;
+            color: #000000 !important;
+        }
+
+        /* Individual options */
+        div[role="option"],
+        div[role="option"] * {
+            background-color: #ffffff !important;
+            color: #000000 !important;
+        }
+
+        /* Hover / highlighted option */
+        div[role="option"][aria-selected="true"],
+        div[role="option"]:hover {
+            background-color: #e6f2ff !important;  /* light blue highlight */
+            color: #000000 !important;
+        }
+        </style>
+        """,
+        unsafe_allow_html=True,
+    )
 
     st.markdown(
         """
