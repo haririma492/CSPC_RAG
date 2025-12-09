@@ -394,7 +394,7 @@ def main():
         <div style="
             background:#005a92;
             font-size:1.6rem;
-            color:#ffffff;
+            color:#ffffff !important;
             text-align:center;
             font-weight:700;
             padding:12px 8px;
