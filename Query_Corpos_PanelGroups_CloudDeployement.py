@@ -783,8 +783,6 @@ def main():
                         unsafe_allow_html=True
                     )
                     st.write("\n")  # Single newline
-                    st.write("&nbsp;")  # Non-breaking space (HTML)
-
                     st.markdown(
                         """
                         <hr style="
@@ -796,6 +794,7 @@ def main():
                         """,
                         unsafe_allow_html=True,
                     )
+                    st.write("\n")  # Single newline
 
                     panel_order = []
                     for panel_code, items in panels_dict.items():
