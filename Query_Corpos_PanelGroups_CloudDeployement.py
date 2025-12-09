@@ -218,6 +218,34 @@ def time_to_seconds(time_str):
 # ============================================================================
 
 def main():
+    def main():
+        # 🔒 Force global light background & text colors
+        st.markdown("""
+            <style>
+            /* Main app background */
+            [data-testid="stAppViewContainer"] {
+                background-color: #ffffff !important;
+            }
+
+            /* The block that holds your content */
+            .block-container {
+                background-color: #ffffff !important;
+                color: #000000 !important;
+            }
+
+            /* Sidebar background */
+            [data-testid="stSidebar"] {
+                background-color: #f7f7f7 !important;
+                color: #000000 !important;
+            }
+
+            /* Generic text color (catch-all) */
+            body, p, div, span, label {
+                color: #000000 !important;
+            }
+            </style>
+        """, unsafe_allow_html=True)
+
     # ========== CUSTOM CSS ==========
     st.markdown("""
       <style>
