@@ -566,27 +566,38 @@ def main():
     # ========== SEARCH BUTTON ==========
     _, btn_col, _ = st.columns([1.5, 1, 1.5])
     with btn_col:
-        st.markdown("""
-        <style>
-        button[kind="primary"] {
-            background-color: #00426a !important;
-            color: white !important;
-            font-size: 1.5rem !important;
-            padding: 0.8rem 2.2rem !important;
-            border-radius: 0.6rem !important;
-            border: 2px solid #003356 !important;
-        }
-        button[kind="primary"]:hover {
-            background-color: #005a92 !important;
-            border-color: #003356 !important;
-        }
-        </style>
-        """, unsafe_allow_html=True)
+        st.markdown(
+            """
+            <style>
+            /* Primary button styling */
+            button[kind="primary"],
+            div.stButton > button,
+            button[data-testid="baseButton-primary"] {
+                background-color: #00426a !important;
+                color: #ffffff !important;
+                font-size: 1.5rem !important;
+                padding: 0.8rem 2.2rem !important;
+                border-radius: 0.6rem !important;
+                border: 2px solid #003356 !important;
+            }
+
+            button[kind="primary"]:hover,
+            div.stButton > button:hover,
+            button[data-testid="baseButton-primary"]:hover {
+                background-color: #005a92 !important;
+                border-color: #003356 !important;
+                color: #ffffff !important;
+            }
+            </style>
+            """,
+            unsafe_allow_html=True,
+        )
+
         search_clicked = st.button(
             "Search",
             type="primary",
             use_container_width=True,
-            key="btn_search"
+            key="btn_search",
         )
 
     # ========== SEARCH EXECUTION ==========
