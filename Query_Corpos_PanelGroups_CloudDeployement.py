@@ -480,6 +480,7 @@ def main():
         "WEAVIATE_URL",
         "nsrnedu9q1qfxusokfl8q.c0.us-west3.gcp.weaviate.cloud"
     )
+    st.write("")
     weaviate_key = os.getenv("WEAVIATE_API_KEY", "")
     openai_key = os.getenv("OPENAI_API_KEY", "")
     collection_name = os.getenv("WEAVIATE_COLLECTION", "DocChunk")
