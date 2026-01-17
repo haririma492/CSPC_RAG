@@ -30,3 +30,18 @@ ffmpeg/
 .DS_Store
 Thumbs.db
 desktop.ini
+
+# --- added by safe sync ---
+*.pyc
+# Streamlit secrets (NEVER COMMIT)
+.streamlit/secrets.toml
+# Env files
+.env
+.env.*
+# Temporary / backups
+*~
+*.bak
+# Optional data folders (uncomment if you don't want them in git)
+transcripts/
+transcripts_elevenlabs/
+*.txt
