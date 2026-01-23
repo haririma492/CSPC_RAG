@@ -70,6 +70,13 @@ def get_client(_url: str, _key: str):
 def get_collection(_client, _name: str):
     return _client.collections.get(_name)
 
+# ============================================================================
+# RERANKER (LOAD ONCE, FORCE CPU)  ✅ FIXES "meta tensor" ERRORS
+# ============================================================================
+
+@st.cache_resource(show_spinner=False)
+def get_reranker():
+    return CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2", device="cpu")
 
 # ============================================================================
 # PANEL METADATA RETRIEVAL FROM CSPC_PANELS
@@ -480,7 +487,6 @@ def main():
         "WEAVIATE_URL",
         "nsrnedu9q1qfxusokfl8q.c0.us-west3.gcp.weaviate.cloud"
     )
-    st.write("")
     weaviate_key = os.getenv("WEAVIATE_API_KEY", "")
     openai_key = os.getenv("OPENAI_API_KEY", "")
     collection_name = os.getenv("WEAVIATE_COLLECTION", "DocChunk")
@@ -744,15 +750,15 @@ def main():
                         st.write("**First result properties:**")
                         st.json(objects[0].properties)
                     st.markdown('</div>', unsafe_allow_html=True)
-
                 if use_reranker and objects:
                     with st.spinner("Reranking..."):
-                        reranker = CrossEncoder("cross-encoder/ms-marco-MiniLM-L-6-v2")
+                        st.write(" ")
+                        reranker = get_reranker()  # ✅ cached + CPU
                         pairs = [(question, o.properties.get("text", "")) for o in objects]
                         scores = reranker.predict(pairs)
                         for obj, s in zip(objects, scores):
                             obj._rerank_score = float(s)
-                        objects.sort(key=lambda x: getattr(x, "_rerank_score", 0), reverse=True)
+                        objects.sort(key=lambda x: getattr(x, "_rerank_score", 0.0), reverse=True)
 
                 objects = objects[:top_k]
 
@@ -976,3 +982,4 @@ def main():
 
 if __name__ == "__main__":
     main()
+
